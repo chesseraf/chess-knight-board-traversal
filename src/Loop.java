@@ -97,14 +97,12 @@ public class Loop extends Line{
         }
     }
 
-    // merges 2 loops into a line
-    // the 2nd one becomes a part of the first one
-    public boolean linearMerge(Loop other)
+    @Override
+    public boolean mergeLoopsAnywhere()
     {
-        if(farAway(other))
-            return false;
-        
-        
-        return false;
+        return mergeLoopsAnywhereAdjacentPaths();
     }
+
+    //TODO add linearize funciton that returns a line from this loop that starts at a specific coordinate or number
+
 }

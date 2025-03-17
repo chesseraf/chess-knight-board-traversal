@@ -127,12 +127,67 @@ public class Line implements Iterable<CoordinatePair>{
         }
     }
 
+    public boolean lineStepMerge()
+    {
+        Direction dirs[] = Direction.allDirections();
+        for(Direction d:dirs)
+        {
+            Coordinate moved = start().moveDir(d);
+            Line l = moved.getLine();
+            if(l != null )
+            {
+                if(l instanceof Loop)
+                {
+                    //do the merge
+                }
+                else if(isStart(moved))
+                {
+
+                }
+                else if(isEnd(moved))
+                {
+                    
+                }
+            }
+        }
+        return false;
+    }
+
+    public static boolean isStart(Coordinate c)
+    {
+        return c.getNumInLine()==0;
+    }
+    public static boolean isEnd(Coordinate c)
+    {
+        Line l = c.getLine();
+        if(l==null) return false;
+        return c.getNumInLine()==(l.coords.length-1);
+    }
+    
+    public Coordinate start()
+    {
+        return coords[0];
+    }
+
+    public Coordinate end()
+    {
+        return coords[coords.length-1];
+    }
+
     public boolean mergeLoopsAnywhere()
+    {
+        if(lineStepMerge())
+            return true;
+        return mergeLoopsAnywhereAdjacentPaths();
+    }
+
+
+    //merges the line with another loop
+    //returns if a merge was succesful
+    public boolean mergeLoopsAnywhereAdjacentPaths()
     {
         //check all adjacent pairs of the current loop, and for them, look at all 
         // easy to make it check if it can loop with anyone rather than a specific other loop
-        // TODO remove the loop that was joined
-        // done, double check needed
         CoordinatePair moved;
         Direction dirs[] = Direction.allDirections();
 
@@ -180,11 +235,9 @@ public class Line implements Iterable<CoordinatePair>{
     {
         int len1 = arr1.length, len2 = arr2.length;
         Coordinate mergedArr[] = new Coordinate[len1 + len2];
-        for(int i=0; i<= split1; i++)
-        {
-            //copy over first array's curi elements
-            mergedArr[i] = arr1[i];
-        }
+
+        //copy over first array's elements before and including split1
+        System.arraycopy(arr1, 0, mergedArr, 0, split1+1);
         if(!reverseArr2){
             for(int i=0; i< len2; i++)
             {
@@ -201,11 +254,8 @@ public class Line implements Iterable<CoordinatePair>{
             }
         }
         
-        for(int i=split1+1; i<len1; i++)
-        {
-            //copy over the second half of the first array
-            mergedArr[i+len2] = arr1[i];
-        }
+        //copy over the second half of the first array
+        System.arraycopy(arr1, split1+1, mergedArr, split1+1+len2, len1-1-split1);
         return mergedArr;
     }
 
@@ -340,6 +390,7 @@ public class Line implements Iterable<CoordinatePair>{
 
     // merges 2 loops into a line
     // the 2nd one becomes a part of the first one
+    //TODO merge line with other line or loop by stepping into any loop from the line's endpoint or another line's endpoint
     public boolean linearMerge(Loop other)
     {
         if(farAway(other))
