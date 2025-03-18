@@ -129,16 +129,40 @@ public class Line implements Iterable<CoordinatePair>{
 
     public boolean lineStepMerge()
     {
+        if(lineStepMergeEndPoint(true))
+        {
+            return true;
+        }
+        return lineStepMergeEndPoint(false);
+    }
+
+    public boolean lineStepMergeEndPoint(boolean start)
+    {
         Direction dirs[] = Direction.allDirections();
         for(Direction d:dirs)
         {
-            Coordinate moved = start().moveDir(d);
+            Coordinate moved;
+            if(start) 
+                moved = start().moveDir(d);
+            else 
+                moved = end().moveDir(d);
+
             Line l = moved.getLine();
-            if(l != null )
+            if(l != null && l!=this)
             {
                 if(l instanceof Loop)
                 {
                     //do the merge
+                    if(start)
+                    {
+                        // int split = -1;
+                        // //coords = mergeArrays(l.coords, coords, moved.getNumInLine(), split,  true);
+                        // newCoords = new Coordinate[coords.length+l.coords.length];
+                        // System.arraycopy(l.coords,0, newCoords, d, split, split);
+                        // board.removeLine(l);
+                    }
+                    int split = start?-1:coords.length-1;
+                    
                 }
                 else if(isStart(moved))
                 {
@@ -358,6 +382,7 @@ public class Line implements Iterable<CoordinatePair>{
     {
         if(obj == null || !(obj instanceof Line)) return false; //not a line
         Line other = (Line) obj;
+        App.numComparisons++;
         if(coords.length == other.coords.length)
         {
             fillSolution();

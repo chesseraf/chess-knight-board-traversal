@@ -1,9 +1,10 @@
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Scanner;
 
 
 public class App {
     public static final boolean RUN_DEFAULT = false;
+    public static int numComparisons = 0;
     public static void main(String[] args) throws Exception {
         System.out.println("Hello!");
         Scanner input = new Scanner(System.in);
@@ -35,16 +36,14 @@ public class App {
             System.out.println("fails: " +f+"/"+numSolutions);
         }
             
-        
-        
-        // 1 000 000 (1 million) solutions in a few seconds for 8x8 board, no repeat checks
-        // 100k solutions, 875 repeats along the way 8x8 before 2nd randomization
-        // 435 repeats after 2nd randomization
+        // 1 000 000 (1 million) solutions in about 20 seconds
+        // there are 0 repeats for 830 000 solutions for 8x8 board
+        // 1000x1000 board solved in ~20 seconds
+        // any repeats from past runs were due to improper hashing and there were likely never any repeats
     }
 
-    //fail rate 0.0028 for 8x8 when merging loop
-    // 0.002 for 8x12 board
-    // ~20 min for 1000 x 1000 board
+    //fail rate 0.005 for 8x8 when merging loop
+    
 
     //prints the solutions if print is true
     // finds num solutions to boards with numRows rows and numCols cols
@@ -82,21 +81,18 @@ public class App {
     //returns the number of solutions found that were repeats
     static int makeAndPrintDifferentSolution(int num, boolean print, int numRows, int numCols)
     {
-        HashMap<Integer,Loop> hash = new HashMap<>();
+        HashSet<Line> hash = new HashSet<>((int)(num/0.75)+1);
         int repeats = 0;
         int fails = 0;
-        int percentDone = 0;
         
         for(int i=0; i<num; i++)
         {
             Board board = Board.make4x4BoardSolver(numRows, numCols);
-            while(!board.solveLoop() || hash.containsValue(board.answer()))
+            while(!board.solveLoop() || hash.contains(board.answer()))
             {
-                if(hash.containsValue(board.answer()))
+                if(hash.contains(board.answer()))
                 {
-                    //System.out.println(i);
-                    repeats+=1;
-                    //System.exit(1);
+                    repeats++;
                 }
                 else
                 {
@@ -104,17 +100,17 @@ public class App {
                 }
                 //occasionally the merge sequence does not result in a solved board
                 board = Board.make4x4BoardSolver(numRows, numCols);
-            }
+            } 
 
-            hash.put(board.answer().hashCode(), board.answer());
+            hash.add(board.answer());
             if(print)
                 board.printAnswer();
             else
             {
-                if((i*100)/num > percentDone&&num>5000)
+                if(i%10000 == 0)
                 {
-                    percentDone = i*100/num;
-                    System.out.println("%"+percentDone+"  Reapeats: "+repeats+"  fails: "+ fails);                   
+                    System.out.print("Progress: "+(i*100/num)+"%");
+                    System.out.println("  Reapeats: "+repeats+"  fails: "+ fails + "  num comparisons: "+numComparisons);                   
                 }
             }
         }
