@@ -395,6 +395,7 @@ public class Line implements Iterable<CoordinatePair>{
     //hashes the rows and cols
     @Override
     public int hashCode() {
+        fillSolution();
         return Arrays.hashCode(rows) + 11*Arrays.hashCode(cols);
     }
 

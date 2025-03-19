@@ -12,43 +12,49 @@ public class App {
         int r = getNumber(input, 8);
         if(r<8) r=8;
         System.out.print("Enter the board col count (mulitple of 4, default 8): ");
-        int c = getNumber(input, 12);
+        int c = getNumber(input, 8);
         if(c<8) c=8;
         System.out.print("Enter the number of solutions: ");
-        int numSolutions = getNumber(input, 10);
+        int numSolutions = getNumber(input, 600000);
         if(numSolutions < 1) numSolutions = 1;
         System.out.print("Should the answers be printed? [y/n] ");
-        boolean displayAns = getBool(input, c*r<1000);
+        boolean displayAns = getBool(input, c*r<1000&&false);
 
         System.out.print("Ensure all answers are different? [y/n] ");
         boolean ensureDifferentAns = getBool(input, true);
-        
+
+        boolean displayProgress = false;
+        if(numSolutions >= 50000 && !displayAns)
+        {
+            System.out.print("Show % progress and statistics? [y/n] ");
+            displayProgress = getBool(input, true);
+        }
+
         System.out.println("");
         int f;
+        
         if(ensureDifferentAns)
         {
-            f=makeAndPrintDifferentSolution(numSolutions, displayAns, r,c);
+            f=makeAndPrintDifferentSolution(numSolutions, displayAns, displayProgress, r,c);
             System.out.println("Repeats: " +f+"/"+numSolutions);
         }
         else
         {
-            f = makeAndPrintSolution(numSolutions, displayAns, r,c);
+            f = makeAndPrintSolution(numSolutions, displayAns,displayProgress, r,c);
             System.out.println("fails: " +f+"/"+numSolutions);
         }
-            
+     
         // 1 000 000 (1 million) solutions in about 20 seconds
         // there are 0 repeats for 830 000 solutions for 8x8 board
         // 1000x1000 board solved in ~20 seconds
-        // any repeats from past runs were due to improper hashing and there were likely never any repeats
+        // 1100 repeats out of 100 000 solutions for 8x8 board
+        //fail rate 0.005 for 8x8 when merging loop
     }
-
-    //fail rate 0.005 for 8x8 when merging loop
-    
 
     //prints the solutions if print is true
     // finds num solutions to boards with numRows rows and numCols cols
     // returns the number of failed boards while finding solutions
-    static int makeAndPrintSolution(int num, boolean print, int numRows, int numCols)
+    static int makeAndPrintSolution(int num, boolean print, boolean displayProgress, int numRows, int numCols)
     {
         int fails = 0;
         for(int i=0; i<num; i++)
@@ -73,13 +79,39 @@ public class App {
             {
                 board.printAnswer();
             }
-                
+            else if(displayProgress)
+            {
+                if(i%10000 == 0 && i!=0)
+                {
+                    System.out.print("Progress: "+(i*100/num)+"%");
+                    System.out.println("  fails: "+ fails + "  num comparisons: "+numComparisons);                   
+                }
+            }
         }
         return fails;
     }
 
+    // should return true, tests map
+    private static boolean  testMap()
+    {
+        HashSet<Line> hash = new HashSet<>(100);
+        Board board = Board.make4x4BoardSolver(8, 8);
+        while(!board.solveLoop()){}
+        Loop a = board.answer();
+        
+        Loop b = new Loop(a.coords);
+        Coordinate temp = b.coords[0];
+        for(int i=0; i<b.coords.length-1; i++)
+        {
+            b.coords[i] = b.coords[i+1];
+        }
+        b.coords[b.coords.length-1] = temp;
+        hash.add(a);
+        return (hash.contains(b));
+
+    }
     //returns the number of solutions found that were repeats
-    static int makeAndPrintDifferentSolution(int num, boolean print, int numRows, int numCols)
+    static int makeAndPrintDifferentSolution(int num, boolean print, boolean displayProgress, int numRows, int numCols)
     {
         HashSet<Line> hash = new HashSet<>((int)(num/0.75)+1);
         int repeats = 0;
@@ -103,11 +135,12 @@ public class App {
             } 
 
             hash.add(board.answer());
+            
             if(print)
                 board.printAnswer();
-            else
+            else if(displayProgress)
             {
-                if(i%10000 == 0)
+                if(i%10000 == 0 && i!=0)
                 {
                     System.out.print("Progress: "+(i*100/num)+"%");
                     System.out.println("  Reapeats: "+repeats+"  fails: "+ fails + "  num comparisons: "+numComparisons);                   
