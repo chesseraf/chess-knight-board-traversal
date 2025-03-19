@@ -4,7 +4,7 @@ import java.util.Iterator;
 public class Line implements Iterable<CoordinatePair>{
     
     protected  Coordinate coords[];
-    protected  boolean isSolution;
+    protected  boolean preCompareDone = false;
     protected  int rows[];
     protected  int cols[];
     protected  int maxr, minr, maxc, minc;
@@ -15,7 +15,7 @@ public class Line implements Iterable<CoordinatePair>{
     public Line(Coordinate arr[])
     {
         coords = arr;
-        isSolution = false;
+        preCompareDone = false;
         updateMinMax();    
         board = null; 
     }
@@ -31,6 +31,11 @@ public class Line implements Iterable<CoordinatePair>{
     public void setTraversalType(LineIterator.Traversal t)
     {
         traversal = t;
+    }
+
+    public Line linearize()
+    {
+        return this;
     }
 
     public void setNumInBoard(int num)
@@ -110,11 +115,10 @@ public class Line implements Iterable<CoordinatePair>{
         || other.minr - maxr > 2);
     }
 
-    public void fillSolution()
+    public void prepareCompare()
     {
-        if(!isSolution)
+        if(!preCompareDone)
         {
-
             rows = new int[coords.length];
             cols = new int[coords.length];
             
@@ -123,17 +127,18 @@ public class Line implements Iterable<CoordinatePair>{
                 rows[i] = coords[(i)].getRows();
                 cols[i] = coords[(i)].getCols();
             }
-            isSolution = true;
+            preCompareDone = true;
         }
     }
 
     public boolean lineStepMerge()
     {
-        if(lineStepMergeEndPoint(true))
-        {
-            return true;
-        }
-        return lineStepMergeEndPoint(false);
+        return(lineStepMergeEndPoint(true) || lineStepMergeEndPoint(false));
+    }
+
+    public boolean isSolution()
+    {
+        return coords.length == board.getRows()*board.getCols();
     }
 
     public boolean lineStepMergeEndPoint(boolean start)
@@ -153,16 +158,25 @@ public class Line implements Iterable<CoordinatePair>{
                 if(l instanceof Loop)
                 {
                     //do the merge
+                    Coordinate newCoords[] = new Coordinate[coords.length+l.coords.length];
+                    int split = moved.getNumInLine();
                     if(start)
-                    {
-                        // int split = -1;
-                        // //coords = mergeArrays(l.coords, coords, moved.getNumInLine(), split,  true);
-                        // newCoords = new Coordinate[coords.length+l.coords.length];
-                        // System.arraycopy(l.coords,0, newCoords, d, split, split);
-                        // board.removeLine(l);
+                    {                        
+                        System.arraycopy(l.coords, split+1, newCoords, 0, l.coords.length-split-1); //after split
+                        System.arraycopy(l.coords, 0, newCoords, l.coords.length-split-1, split+1); //from beginning to split, inclusive
+                        System.arraycopy(coords, 0, newCoords, l.coords.length, coords.length); // the original line
                     }
-                    int split = start?-1:coords.length-1;
-                    
+                    else //end
+                    {
+                        System.arraycopy(coords, 0, newCoords, 0, coords.length); // the original line
+                        System.arraycopy(l.coords, split, newCoords, coords.length, l.coords.length-split); //split and after
+                        System.arraycopy(l.coords, 0, newCoords, coords.length + l.coords.length-split, split); //from beginning to split, exclusive
+                    }
+                    board.removeLine(l);
+                    coords = newCoords;
+                    linkCoords();   
+                    preCompareDone = false;  
+                    return true;               
                 }
                 else if(isStart(moved))
                 {
@@ -200,9 +214,7 @@ public class Line implements Iterable<CoordinatePair>{
 
     public boolean mergeLoopsAnywhere()
     {
-        if(lineStepMerge())
-            return true;
-        return mergeLoopsAnywhereAdjacentPaths();
+        return lineStepMerge() || mergeLoopsAnywhereAdjacentPaths();
     }
 
 
@@ -243,6 +255,7 @@ public class Line implements Iterable<CoordinatePair>{
                         {
                             System.err.println("invalid");
                         }
+                        preCompareDone = false;
                         return true;
                     }
                 }
@@ -355,6 +368,22 @@ public class Line implements Iterable<CoordinatePair>{
     }
 
     public int find00() {return findCoord(new Coordinate(0, 0)); }
+    public int findUpperLeftInd()
+    {
+        if(isSolution())
+            return find00();
+        int min = 0;
+        Coordinate minC = coords[0];
+        for(int i=1; i<coords.length; i++)
+        {
+            if(coords[i].compareTo(minC) < 0)
+            {
+                min = i;
+                minC = coords[i];
+            }
+        }
+        return min;
+    }
 
     public int findCoord(int r, int c){return findCoord(new Coordinate(r, c)); }
 
@@ -385,8 +414,8 @@ public class Line implements Iterable<CoordinatePair>{
         App.numComparisons++;
         if(coords.length == other.coords.length)
         {
-            fillSolution();
-            other.fillSolution();
+            prepareCompare();
+            other.prepareCompare();
             return (Arrays.equals(rows, other.rows) && Arrays.equals(cols, other.cols));
         }
         return false;
@@ -395,7 +424,7 @@ public class Line implements Iterable<CoordinatePair>{
     //hashes the rows and cols
     @Override
     public int hashCode() {
-        fillSolution();
+        prepareCompare();
         return Arrays.hashCode(rows) + 11*Arrays.hashCode(cols);
     }
 

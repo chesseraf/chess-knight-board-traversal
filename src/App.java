@@ -48,6 +48,7 @@ public class App {
         // there are 0 repeats for 830 000 solutions for 8x8 board
         // 1000x1000 board solved in ~20 seconds
         // 1100 repeats out of 100 000 solutions for 8x8 board
+        // no repeats on larger boards, 8x12 for 100 000 solutions
         //fail rate 0.005 for 8x8 when merging loop
     }
 
@@ -97,9 +98,9 @@ public class App {
         HashSet<Line> hash = new HashSet<>(100);
         Board board = Board.make4x4BoardSolver(8, 8);
         while(!board.solveLoop()){}
-        Loop a = board.answer();
+        Line a = board.answer();
         
-        Loop b = new Loop(a.coords);
+        Line b = new Line(a.coords);
         Coordinate temp = b.coords[0];
         for(int i=0; i<b.coords.length-1; i++)
         {

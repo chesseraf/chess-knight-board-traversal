@@ -1,10 +1,11 @@
 
 
 public class Board {
-    private Loop loops[];
+    private Line loops[];
     private int numLoops;
     private final int rows, cols;
     private final Coordinate gameBoard[][];
+    private Coordinate targetEndpoints[];
 
     public static final int INVALID = -1;
 
@@ -56,6 +57,27 @@ public class Board {
         return fin;
     }
 
+    public static Board makeEndPoint4x4Solver(Coordinate s, Coordinate f, int r, int c)
+    {
+        Board fin = make4x4BoardSolver(r,c);
+        Coordinate start = fin.getCoordinate(s.getRows(), s.getCols());
+        Coordinate end = fin.getCoordinate(f.getRows(), f.getCols());
+        fin.targetEndpoints = new Coordinate[2];
+        fin.targetEndpoints[0] = start;
+        fin.targetEndpoints[1] = end;
+
+        for(Coordinate cord: fin.targetEndpoints)
+        {
+            fin.loops[cord.getLine().getNumInBoard()] = fin.loops[cord.getLine().getNumInBoard()].linearize();
+        }
+
+        //TODO linearize the loops
+        //make the lines not jump from the fixed point
+        //make the lines merge with each other and other loops
+        return fin;
+        
+    }
+
     public void linkCoordsToBoard()
     {
         for(int r=0; r<rows; r++)
@@ -80,7 +102,7 @@ public class Board {
             return false;
         }
         int numRem = l.getNumInBoard();
-        Loop temp = loops[numRem];
+        Line temp = loops[numRem];
         loops[numRem] = loops[numLoops-1];
         loops[numLoops-1] = temp; //not used later, but to see what was removed
         loops[numRem].setNumInBoard(numRem);
@@ -189,18 +211,18 @@ public class Board {
                 return false;
             }
         }
-        return loops[0].linearMerge(loops[1]);
+        return loops[0].linearMerge((Loop)loops[1]);
     }
 
     // returns the answer the loop found
     // works if solve was succesful previously
-    public Loop answer(){
+    public Line answer(){
         return loops[0];
     }
 
     //prints the answer, starting at 0,0
     public void printAnswer(){
-        loops[0].printLoopStart00(rows, cols);
+        System.out.println(answer());
     }
 
     @Override

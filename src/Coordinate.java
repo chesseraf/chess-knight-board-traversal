@@ -2,7 +2,7 @@
 
 
 
-public class Coordinate {
+public class Coordinate implements Comparable<Coordinate> {
     private final int r,c;
     private Line line;
     private int numInLoop;
@@ -45,6 +45,19 @@ public class Coordinate {
     public boolean adjacent(Coordinate other)
     {
         return(Math.abs((r-other.r)*(c-other.c)) == 2);
+    }
+
+    // A coordinate with a smaller row is smaller
+    // A coordinte with smaller column is smaller if rows are equal
+    // If both are equal, they are equal
+    @Override
+    public int compareTo(Coordinate other)
+    {
+        if(r == other.r)
+        {
+            return c - other.c;
+        }
+        return r - other.r;
     }
 
     //returns the direction in which the other coordinate is adjacent
