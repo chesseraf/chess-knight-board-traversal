@@ -1,4 +1,3 @@
-import java.util.HashSet;
 import java.util.Scanner;
 
 
@@ -31,27 +30,27 @@ public class App {
         }
 
         System.out.println("");
-        int f;
-        
+        Statistic stat;
+        Solver solver = new LineSolver(r,c);
         if(ensureDifferentAns)
         {
-            f=makeAndPrintDifferentSolution(numSolutions, displayAns, displayProgress, r,c);
-            System.out.println("Repeats: " +f+"/"+numSolutions);
+            stat=solver.makeAndPrintDifferentSolution(numSolutions, displayAns, displayProgress);
         }
         else
         {
-            f = makeAndPrintSolution(numSolutions, displayAns,displayProgress, r,c);
-            System.out.println("fails: " +f+"/"+numSolutions);
+            stat = solver.makeAndPrintSolution(numSolutions, displayAns,displayProgress);
         }
-     
+        System.out.println(stat);
         // 1 000 000 (1 million) solutions in about 20 seconds
         // there are 0 repeats for 830 000 solutions for 8x8 board
         // 1000x1000 board solved in ~20 seconds
         // 1100 repeats out of 100 000 solutions for 8x8 board
         // no repeats on larger boards, 8x12 for 100 000 solutions
-        //fail rate 0.005 for 8x8 when merging loop
+        // fail rate <0.005 for 8x8 when merging loops
+        // fails: 47,321/10,000,000 for 8x8 board
     }
 
+    /*
     //prints the solutions if print is true
     // finds num solutions to boards with numRows rows and numCols cols
     // returns the number of failed boards while finding solutions
@@ -85,32 +84,13 @@ public class App {
                 if(i%10000 == 0 && i!=0)
                 {
                     System.out.print("Progress: "+(i*100/num)+"%");
-                    System.out.println("  fails: "+ fails + "  num comparisons: "+numComparisons);                   
+                    System.out.println("  fails: "+ fails);                   
                 }
             }
         }
         return fails;
     }
 
-    // should return true, tests map
-    private static boolean  testMap()
-    {
-        HashSet<Line> hash = new HashSet<>(100);
-        Board board = Board.make4x4BoardSolver(8, 8);
-        while(!board.solveLoop()){}
-        Line a = board.answer();
-        
-        Line b = new Line(a.coords);
-        Coordinate temp = b.coords[0];
-        for(int i=0; i<b.coords.length-1; i++)
-        {
-            b.coords[i] = b.coords[i+1];
-        }
-        b.coords[b.coords.length-1] = temp;
-        hash.add(a);
-        return (hash.contains(b));
-
-    }
     //returns the number of solutions found that were repeats
     static int makeAndPrintDifferentSolution(int num, boolean print, boolean displayProgress, int numRows, int numCols)
     {
@@ -120,7 +100,13 @@ public class App {
         
         for(int i=0; i<num; i++)
         {
-            Board board = Board.make4x4BoardSolver(numRows, numCols);
+            //Board board = Board.make4x4BoardSolver(numRows, numCols);
+            LoopSolver solver = new LoopSolver(numRows, numCols);
+            while(!solver.solve())
+            {
+                solver.makeSolution();
+                if()
+            }
             while(!board.solveLoop() || hash.contains(board.answer()))
             {
                 if(hash.contains(board.answer()))
@@ -144,12 +130,13 @@ public class App {
                 if(i%10000 == 0 && i!=0)
                 {
                     System.out.print("Progress: "+(i*100/num)+"%");
-                    System.out.println("  Reapeats: "+repeats+"  fails: "+ fails + "  num comparisons: "+numComparisons);                   
+                    System.out.println("  Reapeats: "+repeats+"  fails: "+ fails);                   
                 }
             }
         }
         return repeats;
     }
+    */
     static int getNumber(Scanner scan, int def)
     {
         if(RUN_DEFAULT)

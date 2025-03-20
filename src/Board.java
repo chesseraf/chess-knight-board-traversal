@@ -34,7 +34,7 @@ public class Board {
         int l=0;
 
         fin.numLoops = fin.rows*fin.cols/4;
-        fin.loops = new Loop[fin.numLoops];
+        fin.loops = new Line[fin.numLoops];
         
         for(int r=0; r<fin.rows/4; r++)
         {
@@ -177,7 +177,7 @@ public class Board {
     // public int getNumLoop(){return numLoops;}
     
 
-    private boolean makeMerge()
+    public boolean makeMerge()
     {
         int start = (int)(Math.random()*numLoops);
         for(int i=0; i<numLoops; i++)
@@ -191,17 +191,14 @@ public class Board {
         return false;
     }
 
-    // merges loops until no more merges can be made
-    // returns if a solutions was found. It is stored in loops[0]
-    public boolean solveLoop()
+    public int getNumLoops()
     {
-        while(makeMerge()){}
-
-        return numLoops == 1;
+        return numLoops;
     }
 
     // merges loops until 2 are left.
     // combines them with 1 arbitrary move forming a line
+    // TODO make random line solver
     public boolean solveLine()
     {
         while(numLoops>2)
@@ -223,6 +220,22 @@ public class Board {
     //prints the answer, starting at 0,0
     public void printAnswer(){
         System.out.println(answer());
+    }
+
+    public void setAnswer(Line l)
+    {
+        loops[0] = l;
+        numLoops = 1;
+    }
+
+    public Line getLoop(int num)
+    {
+        if(num>=0 && num<numLoops)
+            return(loops[num]);
+        else
+        {
+            return null;
+        }
     }
 
     @Override

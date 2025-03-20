@@ -351,7 +351,6 @@ public class Line implements Iterable<CoordinatePair>{
     {
         int boardRow = board.getRows();
         int boardCols = board.getCols();
-
         int arr[][] = new int[boardRow][boardCols];
         for(int r=0; r<boardRow; r++)
         {
@@ -365,6 +364,57 @@ public class Line implements Iterable<CoordinatePair>{
             arr[coords[i].getRows()][coords[i].getCols()] = i+1;
         }
         return arrToString(arr, false);
+    }
+
+    public CordIt coordIt(int offset)
+    {
+        return new CordIt(this, offset);
+    }
+    public CordIt coordIt()
+    {
+        return coordIt(0);
+    }
+    
+    public class CordIt implements Iterator<Coordinate>, Iterable<Coordinate>
+    {
+        Line line;
+        int cur = 0;
+        int size;
+        int offset;
+        boolean reverse = false;
+        public CordIt(Line l, int off)
+        {
+            offset = off;
+            line = l;
+            size = line.getSize();
+        }
+        public CordIt(Line l)
+        {
+            this(l,0);
+        }
+        @Override
+        public CordIt iterator() {return this;}
+        @Override
+        public boolean hasNext() {
+            return cur<line.getSize();
+        }
+
+        public void setReverse()
+        {
+            reverse = true;
+        }
+
+        @Override
+        public Coordinate next()
+        {
+            Coordinate fin;
+            if(!reverse)
+               fin = line.coords[(cur+offset)%size];
+            else
+                fin = line.coords[(size-cur+offset-1)%size];
+            cur++;
+            return fin;
+        }
     }
 
     public int find00() {return findCoord(new Coordinate(0, 0)); }
