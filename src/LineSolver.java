@@ -54,6 +54,7 @@ public class LineSolver extends Solver
                         i++;
                     }
                     board.setAnswer(Line.create(newCoords, board));
+                    board.answer().linkCoords();
                     return true;
                 }
             }

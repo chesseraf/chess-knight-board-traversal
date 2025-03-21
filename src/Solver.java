@@ -1,14 +1,15 @@
+import java.util.HashMap;
 import java.util.HashSet;
 
 public abstract class Solver {
     protected Board board;
-    protected Statistic stat = new Statistic();     
+    protected Statistic stat;     
     
     public Solver(int rows, int cols)
     {
         board = Board.make4x4BoardSolver(rows, cols);
-        stat = new Statistic();
     }
+    
     abstract public boolean solve();
     public Line answer()
     {
@@ -43,51 +44,96 @@ public abstract class Solver {
     {
         return (board.toString());
     }
-    public Statistic makeAndPrintDifferentSolution(int num, boolean print, boolean displayProgress)
+    public Statistic makeAndPrintRepeatedSolutions(int num, boolean print, boolean displayProgress)
     {
-        HashSet<Line> hash = new HashSet<>((int)(num/0.75)+1);
-        stat.repeatsUsed();
-        stat.solutionsUsed();
+        HashMap<Line, Integer> hash = new HashMap<>((int)(num/0.75)+1);
+        stat = new Statistic(num);
+        stat.trackRepeats();
+        stat.trackSolutions();
+        int repeatThreshold = 2;
+
         
         for(int i=0; i<num; i++)
         {
+            
+            while(hash.containsKey(makeSolution()))
+            {
+                Integer numRep = hash.get(answer());
+                numRep++;
+                hash.put(answer(), numRep);
+                stat.repeat();
+                if(numRep >= repeatThreshold)
+                {
+                    if(numRep > repeatThreshold)
+                    {
+                        System.out.println("***");
+                    }
+                    if(print)
+                    {
+                        System.out.println(answer());
+                    }
+                    System.err.println("repeat amount: "+numRep);
+                }
+                restartSolver();
+            }
+            hash.put(answer(),1);
+            if(displayProgress)
+            {
+                displayProgress();
+            }
             restartSolver();
+        }
+        return stat;
+    }
+    public Statistic makeAndPrintDifferentSolution(int num, boolean print, boolean displayProgress)
+    {
+        HashSet<Line> hash = new HashSet<>((int)(num/0.75)+1);
+        stat = new Statistic(num);
+        stat.trackRepeats();
+        stat.trackSolutions();
+        
+        for(int i=0; i<num; i++)
+        {
+            
             while(hash.contains(makeSolution()))
             {
                 stat.repeat();
+                restartSolver();
             }
             hash.add(answer());
             
             if(print)
-                System.out.println(answerStr());
+                System.out.println(answer());
             else if(displayProgress)
             {
-                if(i%10000 == 0 && i!=0)
-                {
-                    System.out.print("Progress: "+(i*100/num)+"%");
-                    System.out.println("  Reapeats: "+stat.getRepeats()+"  fails: "+ stat.getFails());                   
-                }
+                displayProgress();
             }
+            restartSolver();
         }
         return stat;
     }
+    public void displayProgress()
+    {
+        if(stat.getSolutions()%20000 == 0 && stat.getSolutions()>0)
+        {
+            System.out.println(stat);
+        }
+    }
     public Statistic makeAndPrintSolution(int num, boolean print, boolean displayProgress)
     {
-        stat.solutionsUsed();
+        stat = new Statistic(num);
+        stat.trackSolutions();
+        stat.trackFails();
         
         for(int i=0; i<num; i++)
         {
             restartSolver();
             makeSolution();
             if(print)
-                System.out.println(answerStr());
+                System.out.println(answer());
             else if(displayProgress)
             {
-                if(i%10000 == 0 && i!=0)
-                {
-                    System.out.print("Progress: "+(i*100/num)+"%");
-                    System.out.println("  fails: "+ stat.getFails());                   
-                }
+                displayProgress();
             }
         }
         return stat;

@@ -40,9 +40,7 @@ public class Loop extends Line{
             }
             preCompareDone = true;
         }
-    }
-
-    
+    }   
 
     @Override
     public Iterator<CoordinatePair> iterator()
@@ -50,30 +48,10 @@ public class Loop extends Line{
         return new LoopIterator(coords, traversal);
     }
     
-
     public static void printBoardArr(int arr[][])
     {
         System.out.println(Line.arrToString(arr, false));
     }
-
-    
-
-    //prints the loop on the board, starting from 0,0
-    // public void printLoopStart00(int boardRow, int boardCols)
-    // {
-    //     fillSolution();
-    //     if(!isSolution)
-    //         System.out.print(toString());
-    //     else
-    //     {
-    //         int arr[][] = new int[boardRow][boardCols];
-    //         for(int i=0; i<coords.length; i++)
-    //         {
-    //             arr[rows[i]][cols[i]] = i+1;
-    //         }
-    //         printBoardArr(arr);
-    //     }
-    // }
 
     @Override
     public String toString()
@@ -88,7 +66,6 @@ public class Loop extends Line{
             arr[rows[i]][cols[i]] = i+1;
         }
         return (Line.arrToString(arr, false));
-    
     }
 
     @Override
@@ -96,7 +73,4 @@ public class Loop extends Line{
     {
         return mergeLoopsAnywhereAdjacentPaths();
     }
-
-    //TODO add linearize funciton that returns a line from this loop that starts at a specific coordinate or number
-
 }

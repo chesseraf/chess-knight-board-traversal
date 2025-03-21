@@ -4,139 +4,79 @@ import java.util.Scanner;
 public class App {
     public static final boolean RUN_DEFAULT = false;
     public static int numComparisons = 0;
+    public static final int RAND_LINES = 0, RAND_LOOPS = 1, ENDPOINT_LINES = 2;
     public static void main(String[] args) throws Exception {
-        System.out.println("Hello!");
-        Scanner input = new Scanner(System.in);
-        System.out.print("Enter the board row count (mulitple of 4, default 8): ");
-        int r = getNumber(input, 8);
-        if(r<8) r=8;
-        System.out.print("Enter the board col count (mulitple of 4, default 8): ");
-        int c = getNumber(input, 8);
-        if(c<8) c=8;
-        System.out.print("Enter the number of solutions: ");
-        int numSolutions = getNumber(input, 600000);
-        if(numSolutions < 1) numSolutions = 1;
-        System.out.print("Should the answers be printed? [y/n] ");
-        boolean displayAns = getBool(input, c*r<1000&&false);
+        int solverType;
+        int defaultr = 8, defaultc = 8;
+        int defaultNumSolutions = 10;
+        boolean defaultDisplayAllAns = false;
+        boolean defaultEnsureDifferentAns = true;
+        boolean defaultDisplayRepeatsOnly = true;
+        boolean defaultDisplayProgress = true;
 
-        System.out.print("Ensure all answers are different? [y/n] ");
-        boolean ensureDifferentAns = getBool(input, true);
-
-        boolean displayProgress = false;
-        if(numSolutions >= 50000 && !displayAns)
+        boolean running;
+        do 
         {
-            System.out.print("Show % progress and statistics? [y/n] ");
-            displayProgress = getBool(input, true);
-        }
+            System.out.println("Hello!");
+            Scanner input = new Scanner(System.in);
+            System.out.print("Enter the board row count (mulitple of 4, default 8): ");
+            int r = getNumber(input, defaultr);
+            if(r<8) r=8;
+            System.out.print("Enter the board col count (mulitple of 4, default 8): ");
+            int c = getNumber(input, defaultc);
+            if(c<8) c=8;
+            System.out.print("Enter the number of solutions: ");
+            int numSolutions = getNumber(input, defaultNumSolutions);
+            if(numSolutions < 1) numSolutions = 1;
+            System.out.print("Should the answers be printed? [y/n] ");
+            boolean displayAns = getBool(input, defaultDisplayAllAns);
 
-        System.out.println("");
-        Statistic stat;
-        Solver solver = new LineSolver(r,c);
-        if(ensureDifferentAns)
-        {
-            stat=solver.makeAndPrintDifferentSolution(numSolutions, displayAns, displayProgress);
-        }
-        else
-        {
-            stat = solver.makeAndPrintSolution(numSolutions, displayAns,displayProgress);
-        }
-        System.out.println(stat);
-        // 1 000 000 (1 million) solutions in about 20 seconds
-        // there are 0 repeats for 830 000 solutions for 8x8 board
-        // 1000x1000 board solved in ~20 seconds
-        // 1100 repeats out of 100 000 solutions for 8x8 board
-        // no repeats on larger boards, 8x12 for 100 000 solutions
-        // fail rate <0.005 for 8x8 when merging loops
-        // fails: 47,321/10,000,000 for 8x8 board
-    }
+            System.out.println("Specify solver type: 0 for lines, 1 for loops");
+            solverType = getNumber(input, RAND_LOOPS);
 
-    /*
-    //prints the solutions if print is true
-    // finds num solutions to boards with numRows rows and numCols cols
-    // returns the number of failed boards while finding solutions
-    static int makeAndPrintSolution(int num, boolean print, boolean displayProgress, int numRows, int numCols)
-    {
-        int fails = 0;
-        for(int i=0; i<num; i++)
-        {
-            Board board = Board.make4x4BoardSolver(numRows, numCols);
+            System.out.print("Ensure all answers are different? [y/n] ");
+            boolean ensureDifferentAns = getBool(input, defaultEnsureDifferentAns);
 
-            // solve the board until a solution is found
-            while(!board.solveLoop())
+            boolean displayRepeatsOnly = false;
+            if(ensureDifferentAns && !displayAns)
             {
-                board = Board.make4x4BoardSolver(numRows, numCols);
-                fails++;
+                System.out.print("Display only repeats? [y/n] ");
+                displayRepeatsOnly = getBool(input, defaultDisplayRepeatsOnly);
             }
 
-            // if the solution is invaid, algorithm went wrong somewhere and quits
-            if(!board.answer().valid())
+            boolean displayProgress = false;
+            if(numSolutions >= 50000 && !displayAns)
             {
-                board.printAnswer();
-                System.err.println("invalid");
-                System.exit(1);
+                System.out.print("Show % progress and statistics? [y/n] ");
+                displayProgress = getBool(input, defaultDisplayProgress);
             }
-            if(print)
-            {
-                board.printAnswer();
-            }
-            else if(displayProgress)
-            {
-                if(i%10000 == 0 && i!=0)
-                {
-                    System.out.print("Progress: "+(i*100/num)+"%");
-                    System.out.println("  fails: "+ fails);                   
-                }
-            }
-        }
-        return fails;
-    }
 
-    //returns the number of solutions found that were repeats
-    static int makeAndPrintDifferentSolution(int num, boolean print, boolean displayProgress, int numRows, int numCols)
-    {
-        HashSet<Line> hash = new HashSet<>((int)(num/0.75)+1);
-        int repeats = 0;
-        int fails = 0;
-        
-        for(int i=0; i<num; i++)
-        {
-            //Board board = Board.make4x4BoardSolver(numRows, numCols);
-            LoopSolver solver = new LoopSolver(numRows, numCols);
-            while(!solver.solve())
+            System.out.println("");
+            Statistic stat;
+            Solver solver;
+            if(solverType == RAND_LINES) 
+                solver = new LineSolver(r,c);
+            else if(solverType == RAND_LOOPS)
+                solver = new LoopSolver(r,c);
+            else
+                solver = new LoopSolver(r,c);
+            if(ensureDifferentAns)
             {
-                solver.makeSolution();
-                if()
-            }
-            while(!board.solveLoop() || hash.contains(board.answer()))
-            {
-                if(hash.contains(board.answer()))
-                {
-                    repeats++;
-                }
+                if(displayRepeatsOnly)
+                    stat=solver.makeAndPrintRepeatedSolutions(numSolutions, displayAns, displayProgress);
                 else
-                {
-                    fails++;
-                }
-                //occasionally the merge sequence does not result in a solved board
-                board = Board.make4x4BoardSolver(numRows, numCols);
-            } 
-
-            hash.add(board.answer());
-            
-            if(print)
-                board.printAnswer();
-            else if(displayProgress)
-            {
-                if(i%10000 == 0 && i!=0)
-                {
-                    System.out.print("Progress: "+(i*100/num)+"%");
-                    System.out.println("  Reapeats: "+repeats+"  fails: "+ fails);                   
-                }
+                    stat=solver.makeAndPrintDifferentSolution(numSolutions, displayAns, displayProgress);
             }
-        }
-        return repeats;
+            else
+            {
+                stat = solver.makeAndPrintSolution(numSolutions, displayAns,displayProgress);
+            }
+            System.out.println(stat);
+            System.out.println("Would you like to run again? [y/n]");
+            running = getBool(input, true);
+        }while(running);
     }
-    */
+
     static int getNumber(Scanner scan, int def)
     {
         if(RUN_DEFAULT)
