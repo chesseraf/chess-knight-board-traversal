@@ -11,10 +11,8 @@ import java.util.Queue;
 
 public class EndPointSolver extends Solver {
     private Coordinate targetStart, targetEnd;
-    
-    
-    public EndPointSolver(int rows, int cols, Coordinate s, Coordinate f) {
-        super(rows, cols);
+    public EndPointSolver(int rows, int cols, Coordinate s, Coordinate f, BoardCreator bc) {
+        super(rows, cols, bc);
         targetStart = board.getCoordinate(s.getRows(), s.getCols());
         targetEnd = board.getCoordinate(f.getRows(), f.getCols());        
     }

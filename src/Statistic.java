@@ -57,7 +57,7 @@ public class  Statistic  {
     public String toString() {
         String fin = "";
         // if(usesFails())
-        //     fin += "Fails: "+fails;
+        //     fin += "Fails: "+fails+"  ";
         if(usesRepeats())
             fin += "Repeats: "+repeats+"  ";
         if(usesSolutions())

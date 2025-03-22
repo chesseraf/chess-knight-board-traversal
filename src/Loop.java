@@ -113,6 +113,20 @@ public class Loop extends Line{
     }
 
     @Override
+    public Coordinate start()
+    {
+        prepareCompare();
+        return board.getCoordinate(rows[0], cols[0]);
+    }
+
+    @Override
+    public Coordinate end()
+    {
+        prepareCompare();
+        return board.getCoordinate(rows[rows.length-1], cols[cols.length-1]);
+    }
+
+    @Override
     public boolean mergeLoopsAnywhere()
     {
         return mergeLoopsAnywhereAdjacentPaths();

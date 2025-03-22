@@ -4,10 +4,12 @@ import java.util.HashSet;
 public abstract class Solver {
     protected Board board;
     protected Statistic stat;     
+    protected BoardCreator bc;
     
-    public Solver(int rows, int cols)
+    public Solver(int rows, int cols, BoardCreator bC)
     {
-        board = Board.make4x4BoardSolver(rows, cols);
+        bc = bC;
+        board = bc.createBoard(rows, cols);
     }
     
     abstract public boolean solve();
@@ -21,7 +23,7 @@ public abstract class Solver {
     }
     public void restartSolver()
     {
-        board = Board.make4x4BoardSolver(board.getRows(), board.getCols());
+        board = bc.createBoard(board.getRows(), board.getCols());
     }
     public Line makeSolution()
     {

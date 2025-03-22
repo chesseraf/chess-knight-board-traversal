@@ -9,9 +9,9 @@ import java.util.Iterator;
  */
 public class LineSolver extends Solver
 {
-    public LineSolver(int rows, int cols)
+    public LineSolver(int rows, int cols, BoardCreator bc)
     {
-        super(rows, cols);
+        super(rows, cols, bc);
     }
 
      // merges loops until no more merges can be made
@@ -21,6 +21,8 @@ public class LineSolver extends Solver
     {
         while(board.makeMerge() && board.getNumLines()>2){}
 
+        if(board.getNumLines()>2)
+            return false;
         if(!answer().valid())
         {
             System.err.println("");

@@ -8,6 +8,8 @@ All solvers can make 100k different solutions for 8x8 boards in under 20 seconds
 All solvers can solve a 1000 x 1000 board in 25 seconds.
 The solvers without prespecified endpoints can solve a 1000 x 1000 board in 10 seconds
 
+There is an option to add extra randomness which should preserve similar statistics.
+
 
 ## Getting Started
 

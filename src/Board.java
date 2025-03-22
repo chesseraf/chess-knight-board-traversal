@@ -1,3 +1,5 @@
+
+
 public class Board {
     private Line lines[];
     private int numLines;
@@ -62,7 +64,7 @@ public class Board {
     // the board is rs x cs
     // the board is split into 4x4 quadrants, and each quadrant is split into 4 loops of 4 coordinates
     // coordinates, loops, and the board are all linked with each other
-    public static Board make4x4BoardSolver(int rs, int cs)
+    public static Board make4x4Board(int rs, int cs)
     {
         Board fin = new Board(rs/4*4, cs/4*4); //multiples of 4
         fin.linkCoordsToBoard();
@@ -90,6 +92,44 @@ public class Board {
             }
         }
         return fin;
+    }
+
+    public static Board makeMiniLoop(int rs, int cs)
+    {
+        Board orig = make4x4Board(rs, cs);
+        Line newLines[] = new Line[orig.lines.length*2];
+        int numL=0;
+        for(Line l:orig.lines)
+        {
+            boolean rand = Math.random()>0.5;
+            if(rand)
+            {
+                Coordinate arr1[] = {l.getCoord(0), l.getCoord(1)};
+                newLines[numL] = new Loop(arr1);  
+                numL++;
+                Coordinate arr2[] = {l.getCoord(2), l.getCoord(3)};
+                newLines[numL] = new Loop(arr2); 
+                numL++;
+            }
+            else
+            {
+                Coordinate arr1[] = {l.getCoord(3), l.getCoord(0)};
+                newLines[numL] = new Loop(arr1); 
+                numL++;
+                Coordinate arr2[] = {l.getCoord(1), l.getCoord(2)};
+                newLines[numL] = new Loop(arr2); 
+                numL++;
+            }
+        }
+        orig.lines = newLines;
+        orig.numLines = newLines.length;
+        for(int i=0; i<orig.numLines; i++)
+        {
+            orig.lines[i].setNumInBoard(i);
+            orig.lines[i].setBoard(orig);
+            orig.lines[i].linkCoords();
+        }
+        return orig;
     }
 
     // makes the board's coordinates have access to the board

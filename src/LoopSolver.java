@@ -12,9 +12,9 @@
  */
 public class LoopSolver extends Solver
 {
-    public LoopSolver(int rows, int cols)
+    public LoopSolver(int rows, int cols, BoardCreator bc)
     {
-        super(rows, cols);
+        super(rows, cols, bc);
     }
 
      // merges loops until no more merges can be made
