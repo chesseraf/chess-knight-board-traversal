@@ -14,6 +14,10 @@ public class LoopIterator extends LineIterator{
     {
         CoordinatePair toRet = new CoordinatePair(arr[order[cur]], arr[(order[cur]+1)%arr.length]);
         cur++;
+        if(!toRet.consecutiveInLoop())
+        {
+            System.out.println("Not consecutive");
+        }
         return toRet;
     }
     

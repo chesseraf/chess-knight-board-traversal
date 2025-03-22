@@ -85,12 +85,60 @@ public class Coordinate implements Comparable<Coordinate> {
         return new Coordinate(row, col);
     }
 
-    public boolean consecutiveInLoop(Coordinate other)
+    /**
+     * 
+     * @return the next coordinate in its line, and null if it has no line
+     */
+    public Coordinate nextInLine()
     {
-        return (line != null && line == other.line && (line instanceof Loop) && Math.abs((numInLoop - other.numInLoop)%line.getSize())==1);
+        if(line == null)
+        {
+            return null;
+        }
+        return line.getCoord((numInLoop+1)%line.getSize());
+    }
+    /**
+     * 
+     * @return the previous coordinate in its line, and null if it has no line
+     */
+    public Coordinate prevInLine()
+    {
+        if(line == null)
+        {
+            return null;
+        }
+        return line.getCoord((numInLoop-1+line.getSize())%line.getSize());
     }
 
+    /**
+     * 
+     * @param other
+     * @return whether this and the other coordinate are int the same line, the line is a loop, and they are consecutive
+     */
+    public boolean consecutiveInLoop(Coordinate other)
+    {
+        if((line == null || line != other.line || !(line instanceof Loop)))
+            return false;
+        if(!adjacent(other)) 
+            return false;
+        int dif = (numInLoop - other.numInLoop+ line.getSize())%line.getSize();
+        return (dif==1 || dif ==line.getSize()-1);
+    }
+
+    /**
+     * 
+     * @return true if the coordinate is white on a chess board, with 0,0 being black
+     */
+    public boolean isWhite()
+    {
+        return (r+c)%2 == 1;
+    }
     
+    /**
+     * 
+     * @param other
+     * @return true if the row and col are the same
+     */
     public boolean equals(Coordinate other)
     {
         return r == other.r && c==other.c;

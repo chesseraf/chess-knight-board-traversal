@@ -21,6 +21,43 @@ public class Loop extends Line{
         return  Line.create(coords, board);
     }
 
+    /**
+     * 
+     * @param s
+     * @param f must be consecutive with s
+     * @return the line that starts at s and ends at f, with this loop's sequence
+     */
+    public Line linearize(Coordinate s, Coordinate f)
+    {
+        if(!s.consecutiveInLoop(f))
+        {
+            return null;
+        }
+        CordIt it; 
+        if(s.nextInLine() ==f)
+        {
+            it = coordIt(f.getNumInLine());
+            it.setReverse();
+        }
+        else
+        {
+            it = coordIt(s.getNumInLine());
+        }
+        Coordinate arr[] = new Coordinate[coords.length];
+        for(int i=0; i<coords.length; i++)
+        {
+            arr[i] = it.next();
+        }
+        Line linear = Line.create(arr, board);
+        if(board != null)
+        {
+            board.update(this, linear);
+            linear.setNumInBoard(getNumInBoard());
+        }
+        return linear;
+
+    }
+
     // if not yet filled, makes the rows and cols arrays have, at index i, the row or col of the the ith coordinate in the loop
     // with the 0th coordinate being 0,0 which marks the start of the loop. Used for comparing, hashing, printing
     // marks the loop as a solution, so this is not repeated

@@ -17,7 +17,7 @@ public class LoopSolver extends Solver
     public boolean solve()
     {
         while(board.makeMerge()){}
-        return board.getNumLoops() == 1;
+        return board.getNumLines() == 1;
     }
 
     @Override

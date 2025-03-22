@@ -85,6 +85,7 @@ public abstract class Solver {
         }
         return stat;
     }
+    
     public Statistic makeAndPrintDifferentSolution(int num, boolean print, boolean displayProgress)
     {
         HashSet<Line> hash = new HashSet<>((int)(num/0.75)+1);
@@ -103,7 +104,7 @@ public abstract class Solver {
             hash.add(answer());
             
             if(print)
-                System.out.println(answer());
+                System.out.println(answer()+"\n"+answer().end());
             else if(displayProgress)
             {
                 displayProgress();

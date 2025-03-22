@@ -11,6 +11,14 @@ public class Line implements Iterable<CoordinatePair>{
     protected  Board board;
     private int numInBoard = Board.INVALID;
     protected  LineIterator.Traversal traversal = LineIterator.Traversal.forward;
+    public static int UNLABELED = -1;
+    private int label=UNLABELED;
+    private  boolean locked = false;
+
+    public void setLocked(boolean l)
+    {
+        locked = l;
+    }
     
     public Line(Coordinate arr[])
     {
@@ -26,6 +34,16 @@ public class Line implements Iterable<CoordinatePair>{
         fin.linkCoords();
         fin.board = b;
         return fin;
+    }
+
+    public int getLabel()
+    {
+        return label;
+    }
+
+    public void setLabel(int l)
+    {
+        label = l;
     }
 
     public void setTraversalType(LineIterator.Traversal t)
@@ -133,6 +151,7 @@ public class Line implements Iterable<CoordinatePair>{
 
     public boolean lineStepMerge()
     {
+        if(locked) return false;
         return(lineStepMergeEndPoint(true) || lineStepMergeEndPoint(false));
     }
 
@@ -214,7 +233,7 @@ public class Line implements Iterable<CoordinatePair>{
 
     public boolean mergeLoopsAnywhere()
     {
-        return lineStepMerge() || mergeLoopsAnywhereAdjacentPaths();
+        return  lineStepMerge() || mergeLoopsAnywhereAdjacentPaths();
     }
 
 
@@ -226,7 +245,6 @@ public class Line implements Iterable<CoordinatePair>{
         // easy to make it check if it can loop with anyone rather than a specific other loop
         CoordinatePair moved;
         Direction dirs[] = Direction.allDirections();
-
         setTraversalType(LineIterator.Traversal.random);
         for(CoordinatePair cp: this)
         {
@@ -237,24 +255,28 @@ public class Line implements Iterable<CoordinatePair>{
                 if(moved.consecutiveInLoop())
                 {
                     // must be in a different loop
-                    if(this != moved.getLine())
+                    if(this != moved.getLine() )
                     {
+                        //debugging
+                        // boolean b= moved.forwardOrdered();
+                        // int s0 = cp.second().getNumInLine(), s1 = cp.first().getNumInLine(), s2= moved.first().getNumInLine(), s3 = moved.second().getNumInLine();
+                        // Coordinate ar1[] = coords, arr2[] = moved.getLine().coords;
+                        // Line li = moved.getLine();
+                        // Coordinate newCords[] = new Coordinate[coords.length+li.coords.length];
+
                         if(moved.forwardOrdered())
                         {
+
                             coords = mergeArrays(coords, moved.getLine().coords, cp.first().getNumInLine(), moved.first().getNumInLine(), true);
                         }
                         else
                         {
                             coords = mergeArrays(coords, moved.getLine().coords, cp.first().getNumInLine(), moved.second().getNumInLine(), false);
                         }
-               
+                        
                         board.removeLine(moved.getLine());
                         linkCoords();
-                        //System.out.println(board);
-                        if(!valid())
-                        {
-                            System.err.println("invalid");
-                        }
+
                         preCompareDone = false;
                         return true;
                     }
@@ -375,6 +397,11 @@ public class Line implements Iterable<CoordinatePair>{
         return coordIt(0);
     }
     
+    public Coordinate[] getCoords()
+    {
+        return coords;
+    }
+
     public class CordIt implements Iterator<Coordinate>, Iterable<Coordinate>
     {
         Line line;
@@ -484,11 +511,16 @@ public class Line implements Iterable<CoordinatePair>{
         for(CoordinatePair cp : this)
         {
             if(!cp.adjacent())
+            {
+                System.err.println("not adjacent in pair");
                 return false;
-            if(coords[0].getNumInLine() != i)
+            }
+                
+            if(coords[i].getNumInLine() != i)
             {
                 return false;
             }
+            i++;
         } 
         return(true);
     }
@@ -502,6 +534,23 @@ public class Line implements Iterable<CoordinatePair>{
             return false;
         
         
+        return false;
+    }
+
+    public boolean linearConnect(Line other)
+    {
+        if(end().adjacent(other.start()))
+        {
+            Coordinate newCoords[] = new Coordinate[coords.length+other.coords.length];
+            System.arraycopy(coords, 0, newCoords, 0, coords.length);
+            System.arraycopy(other.coords, 0, newCoords, coords.length, other.coords.length);
+            coords = newCoords;
+            linkCoords();
+            preCompareDone = false;
+            board.removeLine(other);
+            return true;
+            
+        }
         return false;
     }
 }

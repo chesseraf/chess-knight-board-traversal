@@ -13,7 +13,7 @@ public class LineSolver extends Solver
     @Override
     public boolean solve()
     {
-        while(board.makeMerge() && board.getNumLoops()>2){}
+        while(board.makeMerge() && board.getNumLines()>2){}
 
         return finalLoopsIntoLine();
     }
