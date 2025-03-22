@@ -51,100 +51,6 @@ public class EndPointSolver extends Solver {
         return true;
     }
 
-    private  ArrayList<Side> setQuadPath()
-    {
-        //TODO make use of Quad
-        int quadSR = targetStart.getRows()/4;
-        int quadSC = targetStart.getCols()/4;
-        int quadER = targetEnd.getRows()/4;
-        int quadEC = targetEnd.getCols()/4;
-        Quad end = new Quad(quadER, quadEC);
-        Quad start = new Quad(quadSR, quadSC);
-
-        int dist = Math.abs(quadEC-quadSC)+Math.abs(quadSR - quadER);
-        ArrayList<Side> moves = new ArrayList<>();
-        if(dist < 2)
-        {
-            if(quadSR == quadER)
-            {
-                if(quadSR != 0)
-                {
-                    moves.add(Side.UP);
-                    quadSR--;
-                }
-                else
-                {
-                    moves.add(Side.DOWN);
-                    quadSR++;
-                }
-                dist++;  
-            }
-            if(quadEC == quadSC)
-            {
-                if(quadEC != 0)
-                {
-                    moves.add(Side.LEFT);
-                    quadSC--;
-                }
-                else
-                {
-                    moves.add(Side.RIGHT);
-                    quadSC++;
-                }
-                dist++;
-            }
-        }
-        boolean horizontalFirst = !moves.isEmpty() && moves.get(moves.size()-1).isVertical();
-        if(horizontalFirst)
-        {
-            while(quadSC > quadEC)
-            {
-                moves.add(Side.LEFT);
-                quadSC--;
-            }
-            while(quadSC < quadEC)
-            {
-                moves.add(Side.RIGHT);
-                quadSC++;
-            }
-            while(quadSR > quadER)
-            {
-                moves.add(Side.UP);
-                quadSR--;
-            }
-            while(quadSR < quadER)
-            {
-                moves.add(Side.DOWN);
-                quadSR++;
-            }
-        }
-        else
-        {
-            while(quadSR > quadER)
-            {
-                moves.add(Side.UP);
-                quadSR--;
-            }
-            while(quadSR < quadER)
-            {
-                moves.add(Side.DOWN);
-                quadSR++;
-            }
-            while(quadSC > quadEC)
-            {
-                moves.add(Side.LEFT);
-                quadSC--;
-            }
-            while(quadSC < quadEC)
-            {
-                moves.add(Side.RIGHT);
-                quadSC++;
-            }
-        }
-        return moves;
-    }
-
-
     public boolean findPath()
     {
         Queue<Line> arrivableLines = new LinkedList<>();
@@ -234,7 +140,6 @@ public class EndPointSolver extends Solver {
         prev.setNextInPath(((Loop)targetEnd.getLine()).linearize(curStart, targetEnd));
 
         //connect the lines
-        int count = 0;
         for(Line l=targetStart.getLine(); l.getNextInPath()!=null; l=l.getNextInPath())
         {
 
@@ -243,7 +148,6 @@ public class EndPointSolver extends Solver {
                 System.err.println("not adjacent lines after linearization"+l+l.getNextInPath());
                 System.out.println("cur s"+l.start()+"  end: " +l.end()+"  ot start "+l.getNextInPath().start()+"ot end: "+l.getNextInPath().end());
             }
-            count++;
         }
         Line startL;
         while(targetStart.getLine()!=targetEnd.getLine())
@@ -308,8 +212,7 @@ public class EndPointSolver extends Solver {
             return false;
         }
 
-        int i=0;
-        while (board.makeMerge()) {i++;}
+        while (board.makeMerge()) {}
         if(board.getNumLines()==1 && !answer().valid())
         {
             System.err.println("wrong end");

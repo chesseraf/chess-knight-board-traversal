@@ -264,13 +264,6 @@ public class Line implements Iterable<CoordinatePair>{
                     // must be in a different loop
                     if(this != moved.getLine() )
                     {
-                        //debugging
-                        boolean b= moved.forwardOrdered();
-                        int s0 = cp.second().getNumInLine(), s1 = cp.first().getNumInLine(), s2= moved.first().getNumInLine(), s3 = moved.second().getNumInLine();
-                        Coordinate ar1[] = coords, arr2[] = moved.getLine().coords;
-                        Line li = moved.getLine();
-                        Coordinate newCords[] = new Coordinate[coords.length+li.coords.length];
-
                         if(moved.forwardOrdered())
                         {
 
@@ -535,18 +528,6 @@ public class Line implements Iterable<CoordinatePair>{
             i++;
         } 
         return(true);
-    }
-
-    // merges 2 loops into a line
-    // the 2nd one becomes a part of the first one
-    //TODO merge line with other line or loop by stepping into any loop from the line's endpoint or another line's endpoint
-    public boolean linearMerge(Loop other)
-    {
-        if(farAway(other))
-            return false;
-        
-        
-        return false;
     }
 
     public boolean linearConnect(Line other)
