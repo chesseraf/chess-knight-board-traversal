@@ -6,7 +6,7 @@ There are 3 different solvers for the chess knight's tour problem created here.
 The user can specify the size of the board. The number of rows and columns must be divisible by 4, and be at least 8.
 All solvers can make 100k different solutions for 8x8 boards in under 20 seconds.
 All solvers can solve a 1000 x 1000 board in 25 seconds.
-The solvers without prespecified endpoints can 1000 x 1000 board in 10 seconds
+The solvers without prespecified endpoints can solve a 1000 x 1000 board in 10 seconds
 
 
 ## Getting Started
