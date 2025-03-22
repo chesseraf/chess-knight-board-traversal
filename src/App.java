@@ -61,8 +61,8 @@ public class App {
             if(solverType==ENDPOINT_LINES && !RUN_DEFAULT)
             {
                 int rC1,cC1,rC2,cC2;
-                System.out.println("Enter the end points' start row, start column, end row, end column.");
-                System.out.println("Separate with spaces, e.g. '1 2 0 6'");
+                System.out.println("Enter the end points' start row, start column, end row, and end column.");
+                System.out.println("(0,0) is the top left corner. Separate with spaces, e.g. '1 2 0 6'");
                 rC1 = getNumber(input, defaultRC);
                 if(rC1<0||rC1>=r)
                     rC1 = defaultRC;
