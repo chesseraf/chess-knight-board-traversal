@@ -31,6 +31,7 @@ public class Loop extends Line{
     {
         if(!s.consecutiveInLoop(f))
         {
+            System.err.println("linearization failed at :"+s+f);
             return null;
         }
         CordIt it; 
@@ -49,10 +50,16 @@ public class Loop extends Line{
             arr[i] = it.next();
         }
         Line linear = Line.create(arr, board);
+        linear.setNextInPath(getNextInPath());
         if(board != null)
         {
             board.update(this, linear);
             linear.setNumInBoard(getNumInBoard());
+        }
+        if((linear.start()!=s) ||(linear.end() != f)||(!linear.valid()))
+        {
+            System.err.print("linearize failed");
+            return null;
         }
         return linear;
 

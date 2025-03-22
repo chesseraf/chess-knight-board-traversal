@@ -26,13 +26,19 @@ public class EndPointSolver extends Solver {
         //same colored square if the rows and cols all add up to an even
         if(sameColor(targetStart, targetEnd))
             return false;
+        if(targetStart.consecutiveInLoop(targetEnd))
+        {
+            ((Loop)targetStart.getLine()).linearize(targetStart, targetEnd);
+            targetEnd.getLine().setLocked(true);
+            return true;
+        }
         
-        ArrayList<Side> moves = setQuadPath();
-        int dist = moves.size(); 
-        Side lastMove = moves.get(dist-1);
-
-        followPathUntil2Away(moves);
-        //labelLoopsNearEnd(lastMove);
+        if(!findPath())
+        {
+            System.err.println("Path not found");
+            return false;
+        }
+        followPath();
         board.getLoop(0).setLocked(true);
 
         return true;
@@ -132,127 +138,160 @@ public class EndPointSolver extends Solver {
     }
 
 
-    public void labelLoopsNearEnd(Side lastMove)
+    public boolean findPath()
     {
-        int numIterations = 3;
-        Quad endQ = Quad.getQuad(targetEnd);
-        Quad arriveFromQ = endQ.move(lastMove.opposite());
-
-        Coordinate prevFinC = targetEnd.prevInLine(), postFinC = targetEnd.nextInLine();
-        Coordinate arriveFromC = lastMove.furthur(postFinC, prevFinC)>0?prevFinC:postFinC; //closer the the quad we arrive from
         Queue<Line> arrivableLines = new LinkedList<>();
 
         Line finalLine = targetEnd.getLine();
         finalLine.setLabel(0);
         arrivableLines.add(finalLine);
-        // while(arrivableLines.peek()!=null && arrivableLines.peek().getLabel()<numIterations)
-        // {
-        //     Line cur = arrivableLines.poll();
-        //     CoordinatePair cp = getCoordNotEndColor(cur);
-        //     for(Direction d:Direction.allDirections())
-        //     {
-        //         Coordinate moved = cp.first().moveDir(d);
-        //         if(moved.getLine()!=null)
-        //         {
-        //             Line discovered = moved.getLine();
-        //             if(discovered.getLabel()==Line.UNLABELED)
-        //             {
-        //                 discovered.setLabel(cur.getLabel()+1);
-        //                 arrivableLines.add(discovered);
-        //             }
-        //         }
-        //     }
-        // }
-
-        // labeling all loop in the arriveFrom quadrant from which the final merging will be easy
-        for(Direction d:Direction.allDirections())
+        while(targetStart.getLine().getLabel()==Line.UNLABELED)
         {
-            if(arriveFromQ.hasCoord(arriveFromC.moveDir(d)))
+            if(arrivableLines.peek()==null)
+                return false;
+            Line cur = arrivableLines.poll();
+            ArrayList<Coordinate> cp = getCoordEndColor(cur, false);
+            for(Direction d:Direction.allDirections())
             {
-                Line l = arriveFromC.moveDir(d).getLine();
-                if(l.getLabel() ==Line.UNLABELED)
+                for(Coordinate c:cp)
                 {
-                    arrivableLines.add(l);
-                    l.setLabel(1);
-                }
-            }
-        }
-        for(Direction d:Direction.allDirections())
-        {
-            for(Line l:arrivableLines)
-            {
-                Coordinate cLab1 = getCoordNotEndColor(l).first();
-                if(arriveFromQ.hasCoord(cLab1.moveDir(d)))
-                {
-                    Line movedTo = cLab1.moveDir(d).getLine();
-                    if(movedTo.getLabel() == Line.UNLABELED)
+                    Coordinate moved = c.moveDir(d);
+                    if(moved.getLine()!=null)
                     {
-                        arrivableLines.add(movedTo);
-                        movedTo.setLabel(2);
+                        Line discovered = moved.getLine();
+                        if(discovered.getLabel()==Line.UNLABELED)
+                        {
+                            discovered.setLabel(cur.getLabel()+1);
+                            arrivableLines.add(discovered);
+                            discovered.setNextInPath(cur);
+                        }
                     }
                 }
+                
             }
-        }
-    }
-
-    public boolean followPathUntil2Away(ArrayList<Side> moves)
-    {
-        // following the path until 2 away from the target quadrant
-        Side s;
-        Coordinate curLoopEnter = targetStart;
-        Coordinate curLoopEnd;
-        Line curLoop, linearized;
-        Quad curQ = Quad.getQuad(targetStart);
-        for(int i=0; i<moves.size()-3; i++)
-        {
-            s = moves.get(i);
-            curLoop = curLoopEnter.getLine();
-            //move to that quadrant
-            curLoopEnd = (s.furthur(curLoopEnter.nextInLine(), curLoopEnter.prevInLine())>0)
-                ?(curLoopEnter.nextInLine()):(curLoopEnter.prevInLine());
-            //board.curLine.getNumInBoard()((Loop)curLoopEnter.getLine()).linearize(curLoopEnter, curLoopEnd);
-            linearized = ((Loop)curLoop).linearize(curLoopEnter, curLoopEnd);
-            if(linearized == null)
-            {
-                return false;
-            }
-            if(i!=0)
-            {
-                if(!targetStart.getLine().linearConnect(linearized))
-                    return false;
-            }
-            
-            //move to the next quadrant
-            curQ = curQ.move(s);
-            for(Direction d: Direction.allDirections())
-            {
-                if(curQ.hasCoord(curLoopEnd.moveDir(d)))
-                {
-                    curLoopEnter = curLoopEnd.moveDir(d);
-                    break;
-                }
-            }
-            
         }
         return true;
     }
 
-    public boolean reachEnd()
+    public boolean followPath()
     {
-        System.err.println("not reaching end yet");
-        return false;
+        Line curLine = (Loop)targetStart.getLine();
+        Line prev= null;
+        Coordinate curEndpoint, curStart = targetStart, nextStart = null;
+        while(curLine != targetEnd.getLine())
+        {
+            Loop next = (Loop)curLine.getNextInPath();
+            
+            ArrayList<Coordinate> endChoices = getCoordEndColor(curLine,true);
+            curEndpoint = null;
+            for(Coordinate c:endChoices)
+            {
+                if(adjacent(next, c)!=null)
+                {
+                    nextStart = adjacent(next, c);
+                    curEndpoint = c;
+                    break;
+                }
+            }
+            if(curEndpoint==null)
+            {
+                System.err.println("endpoint not found");
+                return false;
+            }
+                
+            curLine = ((Loop)curLine).linearize(curStart, curEndpoint);
+            if(prev!=null)
+            {
+                prev.setNextInPath(curLine);
+            }
+            if(!properParity(curLine))
+            {
+                System.err.println("wrong enpoint parity endpoint solver");
+                return false;
+            }
+            if(prev!=null && !(prev.end().adjacent(curLine.start())))
+            {
+                System.err.println("not adjacent consecutive lines in path");
+                return false;
+            }
+            prev = curLine;
+            curStart = nextStart;
+            
+            curLine = next;
+        }
+        if(prev == null)
+        {
+            System.err.println("path did not reach end endpoint solved");
+            return false;
+        }
+        prev.setNextInPath(((Loop)targetEnd.getLine()).linearize(curStart, targetEnd));
+
+        //connect the lines
+        int count = 0;
+        for(Line l=targetStart.getLine(); l.getNextInPath()!=null; l=l.getNextInPath())
+        {
+
+            if(!properParity(l)/*!l.end().adjacent(l.getNextInPath().start())*/)
+            {
+                System.err.println("not adjacent lines after linearization"+l+l.getNextInPath());
+                System.out.println("cur s"+l.start()+"  end: " +l.end()+"  ot start "+l.getNextInPath().start()+"ot end: "+l.getNextInPath().end());
+            }
+            count++;
+        }
+        Line startL;
+        while(targetStart.getLine()!=targetEnd.getLine())
+        {
+            startL = targetStart.getLine();
+            if(!startL.linearConnect(startL.getNextInPath()))
+            {
+                System.err.println("connect failed");
+                System.err.println(startL+"\n"+startL.getNextInPath());
+                return false;
+            }
+        }
+
+        //check if process worked
+        Line achieved = targetStart.getLine();
+        if(achieved.start()!=targetStart || achieved.end()!=targetEnd)
+        {
+            System.out.println("End points were not connected, after path was found");
+            return false;
+        }
+        return true;
     }
 
-    public boolean sameColor(Coordinate l, Coordinate r)
+    public static Coordinate adjacent(Line l, Coordinate c)
+    {
+        for(Coordinate co:l.getCoords())
+        {
+            if(c.adjacent(co))
+                return co;
+        }
+        return null;
+    }
+
+    public boolean properParity(Line l)
+    {
+        return (sameColor(l.start(), targetStart)||sameColor(l.end(), targetEnd));
+    }
+    public static boolean sameColor(Coordinate l, Coordinate r)
     {
         return (l.isWhite()==r.isWhite());
     }
 
-    public CoordinatePair getCoordNotEndColor(Line l)
+    public ArrayList<Coordinate> getCoordEndColor(Line l, boolean matchEndColor)
     {
-        if(!sameColor(l.getCoord(0), targetEnd))
-            return new CoordinatePair(l.getCoord(0), l.getCoord(2));
-        return new CoordinatePair(l.getCoord(1), l.getCoord(3));
+        ArrayList<Coordinate> fin = new ArrayList<>();
+        int start = 0;
+        if(!sameColor(l.getCoord(0), targetEnd)==matchEndColor)
+        {
+            start=1;
+        }
+        for(int i=start; i<l.getSize();i+=2)
+        {
+            fin.add(l.getCoord(i));
+        }
+        return fin;
     }
 
     @Override
@@ -264,6 +303,6 @@ public class EndPointSolver extends Solver {
 
         int i=0;
         while (board.makeMerge()) {i++;}
-        return board.getNumLines() == 1;
+        return board.getNumLines() == 1 && board.answer().valid();
     }
 }

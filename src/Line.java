@@ -14,10 +14,19 @@ public class Line implements Iterable<CoordinatePair>{
     public static int UNLABELED = -1;
     private int label=UNLABELED;
     private  boolean locked = false;
+    private  Line nextInPath;
 
     public void setLocked(boolean l)
     {
         locked = l;
+    }
+    public void setNextInPath(Line l)
+    {
+        nextInPath = l;
+    }
+    public Line getNextInPath()
+    {
+        return nextInPath;
     }
     
     public Line(Coordinate arr[])
@@ -548,9 +557,12 @@ public class Line implements Iterable<CoordinatePair>{
             linkCoords();
             preCompareDone = false;
             board.removeLine(other);
+            nextInPath = other.nextInPath;
+            label = other.label;
             return true;
-            
+
         }
+        System.err.println("linear connect failed");
         return false;
     }
 }

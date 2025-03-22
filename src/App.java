@@ -3,18 +3,19 @@ import java.util.Scanner;
 
 public class App {
     public static final boolean RUN_DEFAULT = true;
+    public static final int RANDOMIZE = 0;
     public static int numComparisons = 0;
     public static final int RAND_LINES = 0, RAND_LOOPS = 1, ENDPOINT_LINES = 2;
     public static void main(String[] args) throws Exception {
         
         int defaultSoleverType = ENDPOINT_LINES;
-        int defaultr = 20, defaultc = 20;
-        int defaultNumSolutions = 10;
-        boolean defaultDisplayAllAns = true;
+        int defaultr = 8, defaultc = 8;
+        int defaultNumSolutions = 1;
+        boolean defaultDisplayAllAns = false;
         boolean defaultEnsureDifferentAns = true;
         boolean defaultDisplayRepeatsOnly = true;
         boolean defaultDisplayProgress = true;
-        Coordinate defaultSPoint = new Coordinate(0, 0), defaultEPoint = new Coordinate(19, 18);
+        Coordinate defaultSPoint = new Coordinate(0, 0), defaultEPoint = new Coordinate(2, 1);
 
         int solverType;
         boolean running;
@@ -55,6 +56,17 @@ public class App {
             }
 
             System.out.println("");
+            for(int rC1=0; rC1<8;rC1++)
+            for(int cC1=0; cC1<8;cC1++)
+            for(int rC2=0; rC2<8;rC2++)
+            for(int cC2=0; cC2<8;cC2++)
+            {
+                defaultSPoint = new Coordinate(rC1, cC1);
+
+                defaultEPoint = new Coordinate(rC2, cC2);
+                if(EndPointSolver.sameColor(defaultSPoint, defaultEPoint))
+                    continue; 
+            
             Statistic stat;
             Solver solver;
             solver = switch (solverType) {
@@ -74,9 +86,12 @@ public class App {
                 stat = solver.makeAndPrintSolution(numSolutions, displayAns,displayProgress);
             }
             System.out.println(stat);
-            System.out.println("Would you like to run again? [y/n]");
-            running = getBool(input, false);
-        }while(running);
+            //System.out.println("Would you like to run again? [y/n]");
+            
+            }
+            //running = getBool(input, false);
+        
+        }while(false);
     }
 
     // returns a number from the scanner

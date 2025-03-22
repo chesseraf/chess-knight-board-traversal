@@ -25,12 +25,13 @@ public abstract class Solver {
     }
     public Line makeSolution()
     {
-        while(!solve())
+        while(!solve()||!answer().valid())
         {
             restartSolver();
             stat.fail();
         }
         stat.solution();
+
         return answer();
     }
 
@@ -104,7 +105,7 @@ public abstract class Solver {
             hash.add(answer());
             
             if(print)
-                System.out.println(answer()+"\n"+answer().end());
+                System.out.println(answer()+"\n"+answer().start()+"->"+answer().end());
             else if(displayProgress)
             {
                 displayProgress();

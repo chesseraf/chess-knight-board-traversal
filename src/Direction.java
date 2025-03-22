@@ -19,7 +19,7 @@ public class Direction {
     public static Direction[] allDirections()
     {
         Direction arr[] = new Direction[8];
-        int offset = (int)(Math.random()*8);
+        int offset = (int)(Math.random()*8)*App.RANDOMIZE;
         for(int i = 0; i<8; i++)
         {
             arr[(i+offset)%8] = new Direction(i%2 == 0, (i/2)%2 == 0, (i/4)%2==1);
