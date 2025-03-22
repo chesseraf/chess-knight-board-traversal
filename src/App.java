@@ -20,7 +20,12 @@ public class App {
         int defaultRC = 0;
         int solverType;
         boolean running;
-        System.out.println("Hello!");
+        System.out.println("Welcome to the chess knight's tour solver!");
+        System.out.println("The goal is to reach each point on a chess board exactly once without any repeats using knight moves.");
+        System.out.println("You can specify the dimensions of the board, the number of solutions, and the type of solutions.");
+        System.out.println("You can specify if you want all the solutions to be printed, only have the repeated solutions printed, or none printed.");
+        System.err.println("You can choose the endpoints of the solutions if you use the endpoint solver.");
+        System.out.println("");
         do 
         {
             Scanner input = new Scanner(System.in);
