@@ -2,6 +2,13 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
 
+/**
+ * 100 000 solutions in a few seconds for 8x8 board
+ * 0.4% fail rate
+ * 2.8k reapeats of 100k solutions
+ * 1000 x 1000 board in ~20 seconds
+ */
+
 public class EndPointSolver extends Solver {
     private Coordinate targetStart, targetEnd;
     
@@ -39,7 +46,7 @@ public class EndPointSolver extends Solver {
             return false;
         }
         followPath();
-        board.getLoop(0).setLocked(true);
+        targetStart.getLine().setLocked(true);
 
         return true;
     }
@@ -303,6 +310,10 @@ public class EndPointSolver extends Solver {
 
         int i=0;
         while (board.makeMerge()) {i++;}
+        if(board.getNumLines()==1 && !answer().valid())
+        {
+            System.err.println("wrong end");
+        }
         return board.getNumLines() == 1 && board.answer().valid();
     }
 }

@@ -171,8 +171,7 @@ public class Line implements Iterable<CoordinatePair>{
 
     public boolean lineStepMergeEndPoint(boolean start)
     {
-        Direction dirs[] = Direction.allDirections();
-        for(Direction d:dirs)
+        for(Direction d:Direction.allDirections())
         {
             Coordinate moved;
             if(start) 
@@ -253,11 +252,10 @@ public class Line implements Iterable<CoordinatePair>{
         //check all adjacent pairs of the current loop, and for them, look at all 
         // easy to make it check if it can loop with anyone rather than a specific other loop
         CoordinatePair moved;
-        Direction dirs[] = Direction.allDirections();
         setTraversalType(LineIterator.Traversal.random);
         for(CoordinatePair cp: this)
         {
-            for(Direction d:dirs)
+            for(Direction d:Direction.allDirections())
             {
                 moved = cp.moveDir(d);
                 
@@ -267,25 +265,30 @@ public class Line implements Iterable<CoordinatePair>{
                     if(this != moved.getLine() )
                     {
                         //debugging
-                        // boolean b= moved.forwardOrdered();
-                        // int s0 = cp.second().getNumInLine(), s1 = cp.first().getNumInLine(), s2= moved.first().getNumInLine(), s3 = moved.second().getNumInLine();
-                        // Coordinate ar1[] = coords, arr2[] = moved.getLine().coords;
-                        // Line li = moved.getLine();
-                        // Coordinate newCords[] = new Coordinate[coords.length+li.coords.length];
+                        boolean b= moved.forwardOrdered();
+                        int s0 = cp.second().getNumInLine(), s1 = cp.first().getNumInLine(), s2= moved.first().getNumInLine(), s3 = moved.second().getNumInLine();
+                        Coordinate ar1[] = coords, arr2[] = moved.getLine().coords;
+                        Line li = moved.getLine();
+                        Coordinate newCords[] = new Coordinate[coords.length+li.coords.length];
 
                         if(moved.forwardOrdered())
                         {
 
                             coords = mergeArrays(coords, moved.getLine().coords, cp.first().getNumInLine(), moved.first().getNumInLine(), true);
+
                         }
                         else
                         {
                             coords = mergeArrays(coords, moved.getLine().coords, cp.first().getNumInLine(), moved.second().getNumInLine(), false);
                         }
                         
+                        
                         board.removeLine(moved.getLine());
                         linkCoords();
-
+                        if(!valid())
+                        {
+                            System.err.println("invalid");
+                        }
                         preCompareDone = false;
                         return true;
                     }
@@ -521,7 +524,7 @@ public class Line implements Iterable<CoordinatePair>{
         {
             if(!cp.adjacent())
             {
-                System.err.println("not adjacent in pair");
+                System.err.println("not adjacent in pair+"+cp);
                 return false;
             }
                 

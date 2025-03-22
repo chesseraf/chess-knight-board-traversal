@@ -25,12 +25,14 @@ public abstract class Solver {
     }
     public Line makeSolution()
     {
-        while(!solve()||!answer().valid())
+        while(!solve())
         {
-            restartSolver();
             stat.fail();
+            restartSolver();     
         }
         stat.solution();
+        if(!answer().valid())
+            System.err.println("wrone");
 
         return answer();
     }
@@ -51,6 +53,7 @@ public abstract class Solver {
         stat = new Statistic(num);
         stat.trackRepeats();
         stat.trackSolutions();
+        stat.trackFails();
         int repeatThreshold = 2;
 
         
@@ -93,6 +96,7 @@ public abstract class Solver {
         stat = new Statistic(num);
         stat.trackRepeats();
         stat.trackSolutions();
+        stat.trackFails();
         
         for(int i=0; i<num; i++)
         {

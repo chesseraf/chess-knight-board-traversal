@@ -1,3 +1,7 @@
+
+import java.util.ArrayList;
+import java.util.Collections;
+
 public class Direction {
     private final boolean right, up, horizontal;
     
@@ -16,14 +20,14 @@ public class Direction {
     {
         return (up?1:-1) * (horizontal?1:2);
     }
-    public static Direction[] allDirections()
+    public static ArrayList<Direction> allDirections()
     {
-        Direction arr[] = new Direction[8];
-        int offset = (int)(Math.random()*8)*App.RANDOMIZE;
+        ArrayList<Direction> list = new ArrayList<>(8);
         for(int i = 0; i<8; i++)
         {
-            arr[(i+offset)%8] = new Direction(i%2 == 0, (i/2)%2 == 0, (i/4)%2==1);
+            list.add(new Direction(i%2 == 0, (i/2)%2 == 0, (i/4)%2==1));
         }
-        return arr;
+        Collections.shuffle(list);
+        return list;
     }
 }

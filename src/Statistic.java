@@ -16,7 +16,7 @@ public class  Statistic  {
     public int getTargetSolutions() {
         return targetSolutions;
     }
-    public  void trackRepeats() {
+    public void trackRepeats() {
         if(repeats == UNUSED)
             repeats = 0;
     }
@@ -39,6 +39,7 @@ public class  Statistic  {
         return fails != UNUSED;
     }
     public void fail() {
+        trackFails();
         fails++;
     }
     public void repeat() {

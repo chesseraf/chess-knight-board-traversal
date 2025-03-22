@@ -18,7 +18,7 @@ public class CoordinatePair {
     }
     public boolean forwardOrdered()
     {
-        return ((b.getNumInLine()-a.getNumInLine())%getLine().getSize())==1;
+        return ((b.getNumInLine()-a.getNumInLine()+getLine().getSize())%getLine().getSize())==1;
     }
     public CoordinatePair moveDir(Direction dir)
     {

@@ -4,6 +4,12 @@
 // NO repeats on larger boards, 8x12 for 100 000 solutions
 // fail rate <0.005 for 8x8
 // fails: 47,321/10,000,000 for 8x8 board
+
+/**
+ * 100 000 solutions for 8x8 board in a few seconds
+ * 0.4% fail rate
+ * 577 repeats from 100k solutions
+ */
 public class LoopSolver extends Solver
 {
     public LoopSolver(int rows, int cols)
