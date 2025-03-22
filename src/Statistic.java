@@ -56,13 +56,13 @@ public class  Statistic  {
     @Override
     public String toString() {
         String fin = "";
-        if(usesFails())
-            fin += "Fails: "+fails;
+        // if(usesFails())
+        //     fin += "Fails: "+fails;
         if(usesRepeats())
-            fin += "  Repeats: "+repeats;
+            fin += "Repeats: "+repeats+"  ";
         if(usesSolutions())
         {
-            fin += "  Solutions: "+solutions;
+            fin += "Solutions: "+solutions;
             if(targetSolutions != UNUSED)
                 fin += "/"+targetSolutions;
         }
