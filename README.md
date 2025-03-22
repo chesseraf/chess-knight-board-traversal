@@ -9,6 +9,7 @@ All solvers can solve a 1000 x 1000 board in 25 seconds.
 The solvers without prespecified endpoints can solve a 1000 x 1000 board in 10 seconds
 
 There is an option to add extra randomness which should preserve similar statistics.
+The minimum board size is 4x8. If one of the dimensions is 4, then there are less solver options given.
 
 
 ## Getting Started

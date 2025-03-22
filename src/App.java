@@ -15,7 +15,7 @@ public class App {
         boolean defaultDisplayRepeatsOnly = true;
         boolean defaultDisplayProgress = true;
         Coordinate startC = new Coordinate(0, 0), endC = new Coordinate(2, 1); //for enpoint lines
-        BoardCreator bc = new BoardCreator.AccurateBoardCreator();
+        BoardCreator bc;
 
         int defaultRC = 0;
         int solverType;
@@ -32,11 +32,15 @@ public class App {
 
             System.out.print("Enter the board row count (mulitple of 4, default 8): ");
             int r = getNumber(input, defaultr);
-            if(r<8) r=8;
+            if(r<4) 
+                r=4;
 
             System.out.print("Enter the board col count (mulitple of 4, default 8): ");
             int c = getNumber(input, defaultc);
-            if(c<8) c=8;
+            if(c<4) 
+                c=4;
+            if(r==4&&c==4) 
+                c = 8;
 
             System.out.print("Enter the number of solutions: ");
             int numSolutions = getNumber(input, defaultNumSolutions);
@@ -44,10 +48,12 @@ public class App {
 
             System.out.print("Should the answers be printed? [y/n] ");
             boolean displayAns = getBool(input, defaultDisplayAllAns);
-
-            System.out.println("Specify solver type: 0 for lines, 1 for loops, 2 for lines with specified endpoints");
-            solverType = getNumber(input, defaultSoleverType);
-
+            solverType = RAND_LINES;
+            if(r>4 && c>4)
+            {   
+                System.out.println("Specify solver type: 0 for lines, 1 for loops, 2 for lines with specified endpoints");
+                solverType = getNumber(input, defaultSoleverType);
+            }
             System.out.print("Ensure all answers are different? [y/n] ");
             boolean ensureDifferentAns = getBool(input, defaultEnsureDifferentAns);
 
@@ -58,12 +64,18 @@ public class App {
                 displayRepeatsOnly = getBool(input, defaultDisplayRepeatsOnly);
             }
 
-            System.out.println("Would you like a solver with extra randomness? [y/n] ");
-            boolean randomerBC = getBool(input, false);
+            System.out.print("Would you like a solver with extra randomness? [y/n] ");
+            boolean randomerBC = true;
+            if(r>4 && c>4)
+                randomerBC = getBool(input, true);
 
             if(randomerBC)
             {
                 bc = new BoardCreator.RandLessAccurateCreator();
+            }
+            else
+            {
+                bc = new BoardCreator.AccurateBoardCreator();
             }
 
             boolean displayProgress = false;
@@ -111,12 +123,15 @@ public class App {
             }
             Statistic stat;
             Solver solver;
-            solver = switch (solverType) {
-                case RAND_LINES -> new LineSolver(r,c, bc);
-                case RAND_LOOPS -> new LoopSolver(r,c, bc);
-                case ENDPOINT_LINES -> new EndPointSolver(r,c, startC, endC, bc);
-                default -> new LoopSolver(r,c, bc);
-            };
+            if(r==4 || c==4)
+                solver = new LineSolver(r,c, bc);
+            else
+                solver = switch (solverType) {
+                    case RAND_LINES -> new LineSolver(r,c, bc);
+                    case RAND_LOOPS -> new LoopSolver(r,c, bc);
+                    case ENDPOINT_LINES -> new EndPointSolver(r,c, startC, endC, bc);
+                    default -> new LoopSolver(r,c, bc);
+                };
             if(ensureDifferentAns)
             {
                 if(displayRepeatsOnly)
@@ -132,7 +147,7 @@ public class App {
             System.out.println("Would you like to run again? [y/n]");            
             running = getBool(input, false);
         
-        }while(running); 
+        } while(running); 
     }
 
     // returns a number from the scanner

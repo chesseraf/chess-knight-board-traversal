@@ -57,11 +57,10 @@ public abstract class Solver {
         stat.trackSolutions();
         stat.trackFails();
         int repeatThreshold = 2;
-
         
         for(int i=0; i<num; i++)
         {
-            
+            int consecutiveRepeats = 0;
             while(hash.containsKey(makeSolution()))
             {
                 Integer numRep = hash.get(answer());
@@ -70,10 +69,6 @@ public abstract class Solver {
                 stat.repeat();
                 if(numRep >= repeatThreshold)
                 {
-                    if(numRep > repeatThreshold)
-                    {
-                        System.out.println("***");
-                    }
                     if(print)
                     {
                         System.out.println(answer());
@@ -81,6 +76,11 @@ public abstract class Solver {
                     System.err.println("repeat amount: "+numRep);
                 }
                 restartSolver();
+                if(consecutiveRepeats>30)
+                {
+                    System.out.println("These are all the solutions found");
+                    return stat;
+                }
             }
             hash.put(answer(),1);
             if(displayProgress)
@@ -95,18 +95,25 @@ public abstract class Solver {
     public Statistic makeAndPrintDifferentSolution(int num, boolean print, boolean displayProgress)
     {
         HashSet<Line> hash = new HashSet<>((int)(num/0.75)+1);
-        stat = new Statistic(num);
+        stat = new Statistic(num); 
         stat.trackRepeats();
         stat.trackSolutions();
         stat.trackFails();
         
+        
         for(int i=0; i<num; i++)
-        {
-            
+        {            
+            int consecutiveRepeats = 0;
             while(hash.contains(makeSolution()))
             {
                 stat.repeat();
                 restartSolver();
+                consecutiveRepeats++;
+                if(consecutiveRepeats>30)
+                {
+                    System.out.println("These are all the solutions found");
+                    return stat;
+                }
             }
             hash.add(answer());
             

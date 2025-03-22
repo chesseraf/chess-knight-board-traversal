@@ -129,6 +129,11 @@ public class Board {
             orig.lines[i].setBoard(orig);
             orig.lines[i].linkCoords();
         }
+        orig.getCoordinate(0, 0).getLine().mergeLoopsAnywhere();
+        orig.getCoordinate(rs-1, cs-1).getLine().mergeLoopsAnywhere();
+        orig.getCoordinate(rs-1, 0).getLine().mergeLoopsAnywhere();
+        orig.getCoordinate(0, cs-1).getLine().mergeLoopsAnywhere();
+
         return orig;
     }
 

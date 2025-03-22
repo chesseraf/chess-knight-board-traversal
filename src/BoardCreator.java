@@ -8,6 +8,8 @@ public interface BoardCreator {
             return Board.make4x4Board(r, c);
         }
     }
+
+    //15% fail rate for loops on 8x8 board
     class RandLessAccurateCreator implements BoardCreator
     {
         @Override
