@@ -1,5 +1,6 @@
 
 
+
 public class Board {
     private Line lines[];
     private int numLines;
@@ -30,7 +31,7 @@ public class Board {
         }
     }
     
-    public boolean  update(Line toChange, Line replacement)
+    public boolean update(Line toChange, Line replacement)
     {
         if(!contains(toChange))
             return false;

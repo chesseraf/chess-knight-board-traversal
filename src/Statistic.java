@@ -1,3 +1,4 @@
+
 public class  Statistic  {
     public static final int UNUSED = -1;
     private int fails = UNUSED, repeats = UNUSED, solutions = UNUSED, targetSolutions = UNUSED;

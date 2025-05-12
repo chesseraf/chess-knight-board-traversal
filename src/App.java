@@ -1,3 +1,4 @@
+
 import java.util.Scanner;
 
 
@@ -44,16 +45,15 @@ public class App {
 
             System.out.print("Enter the number of solutions: ");
             int numSolutions = getNumber(input, defaultNumSolutions);
-            if(numSolutions < 1) numSolutions = 1;
+            if(numSolutions < 1) 
+                numSolutions = 1;
 
             System.out.print("Should the answers be printed? [y/n] ");
             boolean displayAns = getBool(input, defaultDisplayAllAns);
-            solverType = RAND_LINES;
-            if(r>4 && c>4)
-            {   
-                System.out.println("Specify solver type: 0 for lines, 1 for loops, 2 for lines with specified endpoints");
-                solverType = getNumber(input, defaultSoleverType);
-            }
+            
+            System.out.println("Specify solver type: 0 for lines, 1 for loops, 2 for lines with specified endpoints");
+            solverType = getNumber(input, defaultSoleverType);
+            
             System.out.print("Ensure all answers are different? [y/n] ");
             boolean ensureDifferentAns = getBool(input, defaultEnsureDifferentAns);
 
@@ -65,9 +65,7 @@ public class App {
             }
 
             System.out.print("Would you like a solver with extra randomness? [y/n] ");
-            boolean randomerBC = true;
-            if(r>4 && c>4)
-                randomerBC = getBool(input, true);
+            boolean randomerBC = getBool(input, true);
 
             if(randomerBC)
             {
@@ -84,8 +82,6 @@ public class App {
                 System.out.print("Show % progress and statistics? [y/n] ");
                 displayProgress = getBool(input, defaultDisplayProgress);
             }
-
-            System.out.println("");
 
             if(solverType==ENDPOINT_LINES && !RUN_DEFAULT)
             {
@@ -122,16 +118,12 @@ public class App {
                 } 
             }
             Statistic stat;
-            Solver solver;
-            if(r==4 || c==4)
-                solver = new LineSolver(r,c, bc);
-            else
-                solver = switch (solverType) {
+            Solver solver = switch (solverType) {
                     case RAND_LINES -> new LineSolver(r,c, bc);
                     case RAND_LOOPS -> new LoopSolver(r,c, bc);
                     case ENDPOINT_LINES -> new EndPointSolver(r,c, startC, endC, bc);
                     default -> new LoopSolver(r,c, bc);
-                };
+            };
             if(ensureDifferentAns)
             {
                 if(displayRepeatsOnly)

@@ -1,3 +1,4 @@
+//package knightstour;
 import java.util.Iterator;
 
 public class Loop extends Line{

@@ -1,3 +1,4 @@
+
 import java.util.Iterator;
 public class LineIterator implements Iterator<CoordinatePair> {
     protected  Coordinate arr[];

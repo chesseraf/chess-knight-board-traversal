@@ -1,3 +1,4 @@
+
 public class CoordinatePair {
     private final Coordinate a, b;
     public CoordinatePair(Coordinate f, Coordinate s)

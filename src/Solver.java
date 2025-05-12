@@ -1,3 +1,4 @@
+
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -10,6 +11,7 @@ public abstract class Solver {
     {
         bc = bC;
         board = bc.createBoard(rows, cols);
+        stat = new Statistic(1);
     }
     
     abstract public boolean solve();

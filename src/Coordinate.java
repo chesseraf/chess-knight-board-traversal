@@ -1,7 +1,3 @@
-
-
-
-
 public class Coordinate implements Comparable<Coordinate> {
     private final int r,c;
     private Line line;
