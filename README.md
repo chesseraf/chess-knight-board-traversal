@@ -11,11 +11,6 @@ The solvers without prespecified endpoints can solve a 1000 x 1000 board in 10 s
 There is an option to add extra randomness which should preserve similar statistics.
 The minimum board size is 4x8. If one of the dimensions is 4, then there are less solver options given.
 
-
-## Getting Started
-
-Welcome to the VS Code Java world. Here is a guideline to help you get started to write Java code in Visual Studio Code.
-
 ## Folder Structure
 
 The workspace contains two folders by default, where:
@@ -27,6 +22,6 @@ Meanwhile, the compiled output files will be generated in the `bin` folder by de
 
 > If you want to customize the folder structure, open `.vscode/settings.json` and update the related settings there.
 
-## Dependency Management
-
-The `JAVA PROJECTS` view allows you to manage your dependencies. More details can be found [here](https://github.com/microsoft/vscode-java-dependency#manage-dependencies).
+## Using the jar file
+The .jar file for this project called KnightSolver.jar is available in the project. It is at the same level as the bin and src folders. 
+The package name is KnightPackage. After adding the jar file, for example, use: import KnightPackage.*;
