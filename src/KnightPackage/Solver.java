@@ -30,7 +30,8 @@ public abstract class Solver {
     }
     public Line makeSolution()
     {
-        while(!solve())
+        int orignalFails = stat.getFails();
+        while(!solve() && stat.getFails() - orignalFails < 100)
         {
             stat.fail();
             restartSolver();     
