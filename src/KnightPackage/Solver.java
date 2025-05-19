@@ -7,7 +7,7 @@ public abstract class Solver {
     protected Board board;
     protected Statistic stat;     
     protected BoardCreator bc;
-    private int maxConsecutiveFailsUntilStop = 10000;
+    private int maxConsecutiveFailsUntilStop = 100;
     
     public Solver(int rows, int cols, BoardCreator bC)
     {
@@ -24,6 +24,14 @@ public abstract class Solver {
     public Statistic getStat()
     {
         return stat;
+    }
+    public void setMaxConsecutiveFailsUntilStop(int max)
+    {
+        maxConsecutiveFailsUntilStop = max;
+    }
+    public int getMaxConsecutiveFailsUntilStop()
+    {
+        return maxConsecutiveFailsUntilStop;
     }
     public void restartSolver()
     {
