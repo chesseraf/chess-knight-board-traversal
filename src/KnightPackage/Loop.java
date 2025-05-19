@@ -29,6 +29,7 @@ public class Loop extends Line{
      * @param f must be consecutive with s
      * @return the line that starts at s and ends at f, with this loop's sequence
      */
+    @Override
     public Line linearize(Coordinate s, Coordinate f)
     {
         if(!s.consecutiveInLoop(f))

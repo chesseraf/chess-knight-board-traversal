@@ -7,6 +7,7 @@ public abstract class Solver {
     protected Board board;
     protected Statistic stat;     
     protected BoardCreator bc;
+    private int maxConsecutiveFailsUntilStop = 10000;
     
     public Solver(int rows, int cols, BoardCreator bC)
     {
@@ -28,17 +29,26 @@ public abstract class Solver {
     {
         board = bc.createBoard(board.getRows(), board.getCols());
     }
+    /**
+     * 
+     * @return an answer created by the solver if one was found and increase stat.solution by 1
+     * Otherwise, return an incomplete answer, (not null) but not increment stat.solution
+     */
     public Line makeSolution()
     {
         int orignalFails = stat.getFails();
-        while(!solve() && stat.getFails() - orignalFails < 100)
+        while(!solve() && stat.getFails() - orignalFails < maxConsecutiveFailsUntilStop)
         {
             stat.fail();
             restartSolver();     
         }
+        if(stat.getFails() - orignalFails >= maxConsecutiveFailsUntilStop)
+        {
+            return answer(); // non-null object, stat.solut
+        }
         stat.solution();
         if(!answer().valid())
-            System.err.println("wrone");
+            System.err.println("wrong");
 
         return answer();
     }
@@ -61,9 +71,11 @@ public abstract class Solver {
         stat.trackSolutions();
         stat.trackFails();
         int repeatThreshold = 2;
+        int prevSolutions;
         
         for(int i=0; i<num; i++)
         {
+            prevSolutions = stat.getSolutions();
             int consecutiveRepeats = 0;
             while(hash.containsKey(makeSolution()))
             {
@@ -82,9 +94,17 @@ public abstract class Solver {
                 restartSolver();
                 if(consecutiveRepeats>30)
                 {
-                    System.out.println("These are all the solutions found");
+                    System.out.println("These are all the solutions found\n");
                     return stat;
                 }
+            }
+            if(stat.getSolutions()==prevSolutions)
+            {
+                if(stat.getSolutions() == 0)
+                    System.out.print("No such solutions were found\n");
+                else
+                    System.out.println("These are all the solutions found\n");
+                return stat;
             }
             hash.put(answer(),1);
             if(displayProgress)
@@ -103,10 +123,11 @@ public abstract class Solver {
         stat.trackRepeats();
         stat.trackSolutions();
         stat.trackFails();
-        
+        int prevSolutions;
         
         for(int i=0; i<num; i++)
         {            
+            prevSolutions = stat.getSolutions();
             int consecutiveRepeats = 0;
             while(hash.contains(makeSolution()))
             {
@@ -115,9 +136,17 @@ public abstract class Solver {
                 consecutiveRepeats++;
                 if(consecutiveRepeats>30)
                 {
-                    System.out.println("These are all the solutions found");
+                    System.out.println("These are all the solutions found\n");
                     return stat;
                 }
+            }
+            if(stat.getSolutions()==prevSolutions)
+            {
+                if(stat.getSolutions() == 0)
+                    System.out.print("No such solutions were found\n");
+                else
+                    System.out.println("These are all the solutions found\n");
+                return stat;
             }
             hash.add(answer());
             
@@ -143,11 +172,20 @@ public abstract class Solver {
         stat = new Statistic(num);
         stat.trackSolutions();
         stat.trackFails();
-        
+        int prevSolutions;
         for(int i=0; i<num; i++)
         {
+            prevSolutions = stat.getSolutions();
             restartSolver();
             makeSolution();
+            if(stat.getSolutions()==prevSolutions)
+            {
+                if(stat.getSolutions() == 0)
+                    System.out.print("No such solutions were found\n");
+                else
+                    System.out.println("These are all the solutions found\n");
+                return stat;
+            }
             if(print)
                 System.out.println(answer());
             else if(displayProgress)
@@ -156,7 +194,5 @@ public abstract class Solver {
             }
         }
         return stat;
-    }
-
-    
+    }    
 }

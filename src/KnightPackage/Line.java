@@ -15,13 +15,24 @@ public class Line implements Iterable<CoordinatePair>{
     protected  LineIterator.Traversal traversal = LineIterator.Traversal.forward;
     public static int UNLABELED = -1;
     private int label=UNLABELED;
-    private  boolean locked = false;
+    private  boolean endLocked = false;
+    private  boolean startLocked = false;
     private  Line nextInPath;
 
     public void setLocked(boolean l)
     {
-        locked = l;
+        endLocked = l;
+        startLocked = l;
     }
+    public void lockStart()
+    {
+        startLocked = true;
+    }
+    public void lockEnd()
+    {
+        endLocked = true;
+    }
+
     public void setNextInPath(Line l)
     {
         nextInPath = l;
@@ -65,6 +76,17 @@ public class Line implements Iterable<CoordinatePair>{
     public Line linearize()
     {
         return this;
+    }
+    public Line linearize(Coordinate s, Coordinate f)
+    {
+        if(s == start() && f == end())
+            return this;
+        if(s == end() && f == start())
+        {
+            reverseLine();
+            return this;
+        }
+        return null;
     }
 
     public void setNumInBoard(int num)
@@ -162,8 +184,9 @@ public class Line implements Iterable<CoordinatePair>{
 
     public boolean lineStepMerge()
     {
-        if(locked) return false;
-        return(lineStepMergeEndPoint(true) || lineStepMergeEndPoint(false));
+        return((!startLocked && lineStepMergeEndPoint(true))
+            || (!endLocked && lineStepMergeEndPoint(false)));
+        
     }
 
     public boolean isSolution()
@@ -244,6 +267,18 @@ public class Line implements Iterable<CoordinatePair>{
     public boolean mergeLoopsAnywhere()
     {
         return  lineStepMerge() || mergeLoopsAnywhereAdjacentPaths();
+    }
+
+    public void reverseLine()
+    {
+        // reverse the coordinates
+        Coordinate newCoords[] = new Coordinate[coords.length];
+        for(int i=0; i<coords.length; i++)
+        {
+            newCoords[i] = coords[coords.length-i-1];
+        }
+        coords = newCoords;
+        linkCoords();
     }
 
 
@@ -394,6 +429,8 @@ public class Line implements Iterable<CoordinatePair>{
         }
         return arrToString(arr, false);
     }
+
+
 
     public CordIt coordIt(int offset)
     {

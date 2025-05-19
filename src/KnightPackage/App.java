@@ -6,17 +6,17 @@ import java.util.Scanner;
 public class App {
     public static final boolean RUN_DEFAULT = false;
     public static int numComparisons = 0;
-    public static final int RAND_LINES = 0, RAND_LOOPS = 1, ENDPOINT_LINES = 2;
+    public static final int RAND_LINES = 0, RAND_LOOPS = 1, ENDPOINT_LINES = 2, STARTPOINT_LINES = 3;
     public static void main(String[] args){
         
-        int defaultSoleverType = RAND_LINES;
-        int defaultr = 8, defaultc = 8;
-        int defaultNumSolutions = 1;
+        int defaultSoleverType = STARTPOINT_LINES;
+        int defaultr = 4, defaultc = 8;
+        int defaultNumSolutions = 10;
         boolean defaultDisplayAllAns = true;
         boolean defaultEnsureDifferentAns = true;
-        boolean defaultDisplayRepeatsOnly = true;
+        boolean defaultDisplayRepeatsOnly = false;
         boolean defaultDisplayProgress = true;
-        Coordinate startC = new Coordinate(0, 0), endC = new Coordinate(2, 1); //for enpoint lines
+        Coordinate startC = new Coordinate(2, 5), endC = new Coordinate(2, 1); //for enpoint lines
         BoardCreator bc;
 
         int defaultRC = 0;
@@ -52,7 +52,7 @@ public class App {
             System.out.print("Should the answers be printed? [y/n] ");
             boolean displayAns = getBool(input, defaultDisplayAllAns);
             
-            System.out.println("Specify solver type: 0 for lines, 1 for loops, 2 for lines with specified endpoints");
+            System.out.println("Specify solver type: 0 for lines, 1 for loops, 2 for lines with specified endpoints, 3 for startpoint solver");
             solverType = getNumber(input, defaultSoleverType);
             
             System.out.print("Ensure all answers are different? [y/n] ");
@@ -118,11 +118,27 @@ public class App {
                     System.out.println("instead doing: "+startC+" -> "+endC);
                 } 
             }
+            if(solverType == STARTPOINT_LINES)
+            {
+                int rC1,cC1;
+                System.out.println("Enter the end points' start row, start column.");
+                System.out.println("(0,0) is the top left corner. Separate with spaces, e.g. '1 2'");
+                rC1 = getNumber(input, defaultRC);
+                if(rC1<0||rC1>=r)
+                    rC1 = defaultRC;
+
+                cC1 = getNumber(input, defaultRC);
+                if(cC1<0||cC1>=c)
+                    cC1 = defaultRC;
+                if(!RUN_DEFAULT)
+                    startC = new Coordinate(rC1, cC1);
+            }
             Statistic stat;
             Solver solver = switch (solverType) {
                     case RAND_LINES -> new LineSolver(r,c, bc);
                     case RAND_LOOPS -> new LoopSolver(r,c, bc);
                     case ENDPOINT_LINES -> new EndPointSolver(r,c, startC, endC, bc);
+                    case STARTPOINT_LINES -> new StartpointSolver(r, c, startC, bc);
                     default -> new LoopSolver(r,c, bc);
             };
             if(ensureDifferentAns)
