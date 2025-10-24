@@ -57,13 +57,12 @@ All solvers can make 100k different solutions for 8x8 boards in under 20 seconds
 All solvers can solve a 1000 x 1000 board in 25 seconds.
 The solvers without prespecified endpoints can solve a 1000 x 1000 board in 10 seconds
 
-There is an option to add extra randomness which should preserve similar statistics.
+There is an option to add extra randomness which should preserve similar statistics. There is also an option for higher randomness, but it takes longer to find solutions so the statistics may slightly differ for it.
 The minimum board size is 4x8. If one of the dimensions is 4, then there are less solver options given.
 
 ## Folder Structure
-All of the Java code is in src/KnightPackage
-
-Meanwhile, the compiled output files will be generated in the `bin` folder by default.
+All of the Java code is in `src/KnightPackage`
+The compiled output files will be generated in the `bin` folder by default.
 
 ## Using the jar file
 The .jar file for this project called KnightSolverV4.jar is available in the project. It is at the same level as the bin and src folders. 
@@ -92,21 +91,24 @@ In the example above, a loop can be formed from the cells labled 1, as well as w
 </pre>
 This is how ordering the cells labled 1 can form a loop
 
-Another method for splitting the board into loops works similarily, but splits the board in 4x2 and 2x4 sections made of loops:
+Another method for splitting the board into loops works similarily, but splits each loop from the previous version into 2. In one of 2 ways. For example, the loop formed by the cells labled 1 in the previous example can be split into 2 loops in either of the following 2 ways:
 <pre>
-| <i>1</i>  | 2  | 3  | 4  |  
-| 3  | 4  | <i>1</i>  | 2  |  
-</pre>
-The cells labled 1 can form a loop. There are only 2 squares, but it is a loop since they are adjacent. 
-```
 | 1  |    |    |    |  
 |    |    | 2  |    |  
-```
-
-This is how ordering the cells labled 1 can form a loop
+|    | 1  |    |    |  
+|    |    |    | 2  |  
+OR
+| 1  |    |    |    |  
+|    |    | 1  |    |  
+|    | 2  |    |    |  
+|    |    |    | 2  |  
+</pre>
+Even though there is only 2 squares, it is still a loop.
 
 When the user is asked about using extra randomness, yes results in this 2nd method being used while no results in the first method.
 The 2nd method is able to find a larger amount of different solutions because there is a larger number of loops to start with. 
+
+The 3rd method makes loops by first creating a solution in another method. Then, it takes consecutive pairs of squares in that solution and makes each pair into a loop. This set of loops of size 2 is then used as the starting point for the merging process.
 
 2) Merge the loops with each other until only 1 loop remains. This loop contains all of the squares, so it is an answer. 
 
@@ -136,3 +138,6 @@ Example how 2 loops are merged into one. There is one loop in the upper 4x4 sect
 ```
 
 Note that the 1 and the 8 are adjacent.
+To merge, choose a random line. Go through all consecutive pairs of squares in that line. For each pair, create another pair of squares by moving them with a knight move in any of the 8 possible directions. If the new pair of squares are consecutive squares in another loop, then the 2 loops can be merged by connecting the two pairs of squares. 
+
+In the example above, the upper Loops Coordinates labelled 3 and 4 are considered. When moved 2 down and 1 left (knight move), they land on the lower Loops Coordinates labelled 1 and 2. Since they are consecutive squares in that loop, the 2 loops can be merged. 

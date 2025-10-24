@@ -32,9 +32,9 @@ public class LineSolver extends Solver
         return finalLoopsIntoLine();
     }
 
-    private  boolean finalLoopsIntoLine()
+    private boolean finalLoopsIntoLine()
     {
-        Loop small =(Loop)board.getLoop(0), big = (Loop)board.getLoop(1);
+        Loop small =(Loop)board.getLine(0), big = (Loop)board.getLine(1);
         if(small.getSize()>big.getSize())
         {
             Loop temp = small;

@@ -2,11 +2,32 @@ package KnightPackage;
 public class Tester {
     public static void main(String[] args) {
         // test the singleAnswer class methods
-        Line l = SingleAnswer.solve8x8line();
-        System.out.println("Random 8x8 line:\n" + l);
-        Line l2 = SingleAnswer.solve8x8endPointLine(0, 0, 7, 6);
-        System.out.println("8x8 line from (0,0) to (7,6): \n" + l2);
-        Line l3 = SingleAnswer.solve8x8loop();
-        System.out.println("Random 8x8 loop: \n" + l3);
+        System.out.println("Testing various solvers with different board creators. \nIf nothing else is printed, all tests passed.");
+        BoardCreator bcs[] = {new BC4x2(), new BC4x4()};
+        for(BoardCreator bc : bcs)
+        {
+            Solver s = new LoopSolver(8, 8, bc);
+            testSolver(s, bc);
+            s = new LineSolver(8, 8, bc);
+            testSolver(s, bc);
+            s = new EndPointSolver(8, 8, new Coordinate(0,0), new Coordinate(7,6), bc);
+            testSolver(s, bc);
+            s = new StartpointSolver(8, 8, new Coordinate(0,0), bc);
+            testSolver(s, bc);
+        }
+    }
+
+    public static void testSolver(Solver s, BoardCreator bc)
+    {
+        for (int i=0; i<100; i++)
+        {
+            s.makeSolution();
+            if (!s.answer().valid())
+            {
+                System.err.println("Solver produced invalid solution with board creator: " + bc.getClass().getName());
+                return;
+            }
+            s.restartSolver();
+        }
     }
 }

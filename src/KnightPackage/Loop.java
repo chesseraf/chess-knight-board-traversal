@@ -57,7 +57,6 @@ public class Loop extends Line{
         if(board != null)
         {
             board.update(this, linear);
-            linear.setNumInBoard(getNumInBoard());
         }
         if((linear.start()!=s) ||(linear.end() != f)||(!linear.valid()))
         {
@@ -70,7 +69,7 @@ public class Loop extends Line{
 
     // if not yet filled, makes the rows and cols arrays have, at index i, the row or col of the the ith coordinate in the loop
     // with the 0th coordinate being 0,0 which marks the start of the loop. Used for comparing, hashing, printing
-    // marks the loop as a solution, so this is not repeated
+    // sets the prepare compare flag, so this is not repeated
     @Override
     public void prepareCompare()
     {
@@ -93,11 +92,6 @@ public class Loop extends Line{
     public Iterator<CoordinatePair> iterator()
     {
         return new LoopIterator(coords, traversal);
-    }
-    
-    public static void printBoardArr(int arr[][])
-    {
-        System.out.println(Line.arrToString(arr, false));
     }
 
     @Override

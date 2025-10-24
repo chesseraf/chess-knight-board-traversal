@@ -25,6 +25,9 @@ public class LoopSolver extends Solver
     @Override
     public Loop answer()
     {
-        return (Loop) board.answer();
+        if (board.answer() instanceof Loop answer) {
+            return answer;
+        }
+        return null;
     }
 }

@@ -1,13 +1,10 @@
 package KnightPackage;
 
-
-
 public class Board {
     private Line lines[];
     private int numLines;
     private final int rows, cols;
     private final Coordinate gameBoard[][];
-    
 
     public static final int INVALID = -1;
 
@@ -22,29 +19,33 @@ public class Board {
     {
         return numLines;
     }
-    public Line getLoop(int num)
+    public Line getLine(int num)
     {
-        if(num>=0 && num<numLines)
-            return(lines[num]);
+        if (num >= 0 && num < numLines)
+            return (lines[num]);
         else
         {
             return null;
         }
     }
     
+    // Replaces one line with another
+    // They must contain the same coordinates. The order and type of line may be different 
     public boolean update(Line toChange, Line replacement)
     {
-        if(!contains(toChange))
+        if (!contains(toChange))
             return false;
         int ind = toChange.getNumInBoard();
         lines[ind] = replacement;
+        replacement.setNumInBoard(ind);
+        replacement.setBoard(this);
         replacement.linkCoords();
         return true;
     }
 
     public boolean contains(Line l)
     {
-        return (l.getBoard() == this);
+        return (l.getBoard() == this && l.getNumInBoard() < numLines);
     }
     //sets up the game board and coordinates. No loop or linking
     private Board(int rs, int cs)
@@ -60,83 +61,26 @@ public class Board {
             }
         }
     }
-    
-    // rs and cs must be multiples of 4
-    // they are rounded down to a multiple of 4
-    // the board is rs x cs
-    // the board is split into 4x4 quadrants, and each quadrant is split into 4 loops of 4 coordinates
-    // coordinates, loops, and the board are all linked with each other
-    public static Board make4x4Board(int rs, int cs)
+
+    // Creates a new Board that is split up into loops as specified 
+    // The loops should cover all coordinates on the board exactly once
+    public static Board createLoopedBoard(int rs, int cs, Loop[] loops)
     {
-        Board fin = new Board(rs/4*4, cs/4*4); //multiples of 4
-        fin.linkCoordsToBoard();
-        int l=0;
-
-        fin.numLines = fin.rows*fin.cols/4;
-        fin.lines = new Line[fin.numLines];
-        
-        for(int r=0; r<fin.rows/4; r++)
+        Board b = new Board(rs, cs);
+        b.numLines = loops.length;
+        b.lines = new Line[loops.length];
+        for(int i=0; i<loops.length; i++)
         {
-            for(int c=0; c<fin.cols/4; c++)
-            {
-                for(int corner=0; corner<2; corner++)
-                {
-                    for(int left = 0; left<2;left++)
-                    {
-                        //all starter loops covererd
-                        fin.lines[l] = fin.makeLoop4x4Square(c, r, corner==0,left==0);
-                        fin.lines[l].setNumInBoard(l);
-                        fin.lines[l].setBoard(fin);
-                        fin.lines[l].linkCoords();
-                        l++;
-                    }
-                }
+            b.lines[i] = loops[i];
+            b.lines[i].setNumInBoard(i);
+            b.lines[i].setBoard(b);
+            b.lines[i].linkCoords();
+            for (Coordinate coord : loops[i].getCoords()) {
+                b.gameBoard[coord.getRows()][coord.getCols()] = coord;
             }
         }
-        return fin;
-    }
-
-    public static Board makeMiniLoop(int rs, int cs)
-    {
-        Board orig = make4x4Board(rs, cs);
-        Line newLines[] = new Line[orig.lines.length*2];
-        int numL=0;
-        for(Line l:orig.lines)
-        {
-            boolean rand = Math.random()>0.5;
-            if(rand)
-            {
-                Coordinate arr1[] = {l.getCoord(0), l.getCoord(1)};
-                newLines[numL] = new Loop(arr1);  
-                numL++;
-                Coordinate arr2[] = {l.getCoord(2), l.getCoord(3)};
-                newLines[numL] = new Loop(arr2); 
-                numL++;
-            }
-            else
-            {
-                Coordinate arr1[] = {l.getCoord(3), l.getCoord(0)};
-                newLines[numL] = new Loop(arr1); 
-                numL++;
-                Coordinate arr2[] = {l.getCoord(1), l.getCoord(2)};
-                newLines[numL] = new Loop(arr2); 
-                numL++;
-            }
-        }
-        orig.lines = newLines;
-        orig.numLines = newLines.length;
-        for(int i=0; i<orig.numLines; i++)
-        {
-            orig.lines[i].setNumInBoard(i);
-            orig.lines[i].setBoard(orig);
-            orig.lines[i].linkCoords();
-        }
-        orig.getCoordinate(0, 0).getLine().mergeLoopsAnywhere();
-        orig.getCoordinate(rs-1, cs-1).getLine().mergeLoopsAnywhere();
-        orig.getCoordinate(rs-1, 0).getLine().mergeLoopsAnywhere();
-        orig.getCoordinate(0, cs-1).getLine().mergeLoopsAnywhere();
-
-        return orig;
+        b.linkCoordsToBoard();
+        return b;
     }
 
     // makes the board's coordinates have access to the board
@@ -150,7 +94,6 @@ public class Board {
             }
         }
     }
-
 
     // removes the specified line from the lines and decreases line count
     // returns if the removal was succesful
@@ -196,63 +139,7 @@ public class Board {
         return true;
     }
 
-    //create a loop in 1 of the 4x4 squares
-    // it can be a corner loop or not, 
-    // it can have its bottom most square on the left or right half of the quadrant
-    //col4 is 0 for a-d, 1 for e-h,... x-coord of 4x4 square where loop is made
-    //row4 y-coord of 4x4 square where loop is made
-    private Loop makeLoop4x4Square(int col4, int row4, boolean leftHalf, boolean isCorner)
-    {
-        int sqCol = col4*4;
-        int sqRow = row4*4;
-        Coordinate coords[] = new Coordinate[4];
-        if(!leftHalf){
-            if(isCorner)
-            {
-                //right bottom corner start
-                //like d1, b2, a4, c3
-                sqCol += 3;
-                coords[0] = gameBoard[sqRow][sqCol]; 
-                coords[1] = coords[0].moveDir(new Direction(false, true, true));
-                coords[2] = coords[1].moveDir(new Direction(false, true, false));
-                coords[3] = coords[2].moveDir(new Direction(true, false, true));                
-            }
-            else
-            {
-                //start like c1, a2, b4, d3
-                sqCol += 2;
-                coords[0] = gameBoard[sqRow][sqCol];
-                coords[1] = coords[0].moveDir(new Direction(false, true, true));
-                coords[2] = coords[1].moveDir(new Direction(true, true, false));
-                coords[3] = coords[2].moveDir(new Direction(true, false, true));    
-            }
-        }
-        else
-        {
-            if(isCorner)
-            {
-                // ex a1, b3, d4, c2
-                //coords[0] = gameBoard[x1Coord][y1Coord];
-                coords[0] = gameBoard[sqRow][sqCol];
-                
-                coords[1] = coords[0].moveDir(new Direction(true, true, false));
-                coords[2] = coords[1].moveDir(new Direction(true, true, true));
-                coords[3] = coords[2].moveDir(new Direction(false, false, false));    
-            }
-            else
-            {
-                //ex b1, a3, c4, d2
-                sqCol += 1;
-                coords[0] = gameBoard[sqRow][sqCol];
-                coords[1] = coords[0].moveDir(new Direction(false, true, false));
-                coords[2] = coords[1].moveDir(new Direction(true, true, true));
-                coords[3] = coords[2].moveDir(new Direction(true, false, false));    
-            }
-            
-        }
-        Loop finLoop = new Loop(coords);
-        return finLoop;
-    }
+    
 
     // finds 2 loops or a line and loop, and merges them
     // returns if it was succesful

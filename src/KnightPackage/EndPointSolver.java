@@ -34,7 +34,7 @@ public class EndPointSolver extends Solver {
             return false;
         if(targetStart.consecutiveInLoop(targetEnd))
         {
-            ((Loop)targetStart.getLine()).linearize(targetStart, targetEnd);
+            targetStart.getLine().linearize(targetStart, targetEnd);
             targetEnd.getLine().setLocked(true);
             return true;
         }
@@ -87,12 +87,13 @@ public class EndPointSolver extends Solver {
 
     public boolean followPath()
     {
-        Line curLine = (Loop)targetStart.getLine();
+        Line curLine = targetStart.getLine();
         Line prev= null;
         Coordinate curEndpoint, curStart = targetStart, nextStart = null;
+
         while(curLine != targetEnd.getLine())
         {
-            Loop next = (Loop)curLine.getNextInPath();
+            Line next = curLine.getNextInPath();
             
             ArrayList<Coordinate> endChoices = getCoordEndColor(curLine,true);
             curEndpoint = null;
@@ -111,7 +112,7 @@ public class EndPointSolver extends Solver {
                 return false;
             }
                 
-            curLine = ((Loop)curLine).linearize(curStart, curEndpoint);
+            curLine = curLine.linearize(curStart, curEndpoint);
             if(prev!=null)
             {
                 prev.setNextInPath(curLine);
@@ -127,6 +128,10 @@ public class EndPointSolver extends Solver {
                 return false;
             }
             prev = curLine;
+            if (prev == null) {
+                System.err.println("prev is null in follow path");
+                return false;
+            }
             curStart = nextStart;
             
             curLine = next;
@@ -134,9 +139,11 @@ public class EndPointSolver extends Solver {
         if(prev == null)
         {
             System.err.println("path did not reach end endpoint solved");
+            System.err.println(""+targetStart.getLine()+" to "+targetEnd.getLine());
+            System.err.println("start: " + targetStart + " end: " + targetEnd);
             return false;
         }
-        prev.setNextInPath(((Loop)targetEnd.getLine()).linearize(curStart, targetEnd));
+        prev.setNextInPath(targetEnd.getLine().linearize(curStart, targetEnd));
 
         //connect the lines
         for(Line l=targetStart.getLine(); l.getNextInPath()!=null; l=l.getNextInPath())

@@ -1,7 +1,8 @@
+// Main application file for the Knight's Tour solver
 package KnightPackage;
 
+import KnightPackage.Solver.PrintMode;
 import java.util.Scanner;
-
 
 public class App {
     public static final boolean RUN_DEFAULT = false;
@@ -10,11 +11,10 @@ public class App {
     public static void main(String[] args){
         
         int defaultSoleverType = STARTPOINT_LINES;
-        int defaultr = 4, defaultc = 8;
+        int defaultr = 8, defaultc = 8;
         int defaultNumSolutions = 10;
-        boolean defaultDisplayAllAns = true;
+        int defaultDisplayAllAns = 0;
         boolean defaultEnsureDifferentAns = true;
-        boolean defaultDisplayRepeatsOnly = false;
         boolean defaultDisplayProgress = true;
         Coordinate startC = new Coordinate(2, 5), endC = new Coordinate(2, 1); //for enpoint lines
         BoardCreator bc;
@@ -22,6 +22,7 @@ public class App {
         int defaultRC = 0;
         int solverType;
         boolean running;
+        Scanner input = new Scanner(System.in);
         System.out.println("Welcome to the chess knight's tour solver!");
         System.out.println("The goal is to reach each point on a chess board exactly once without any repeats using knight moves.");
         System.out.println("You can specify the dimensions of the board, the number of solutions, and the type of solutions.");
@@ -30,27 +31,32 @@ public class App {
         System.out.println("");
         do 
         {
-            Scanner input = new Scanner(System.in);
-
             System.out.print("Enter the board row count (mulitple of 4, default 8): ");
-            int r = getNumber(input, defaultr);
+            int r = getNumber(input, defaultr) / 4 * 4;
             if(r<4) 
                 r=4;
 
             System.out.print("Enter the board col count (mulitple of 4, default 8): ");
-            int c = getNumber(input, defaultc);
-            if(c<4) 
-                c=4;
-            if(r==4&&c==4) 
+            int c = getNumber(input, defaultc) / 4 * 4;
+            if (c < 4) 
+                c = 4;
+            if (r == 4 && c == 4) 
                 c = 8;
 
             System.out.print("Enter the number of solutions: ");
             int numSolutions = getNumber(input, defaultNumSolutions);
-            if(numSolutions < 1) 
+            if (numSolutions < 1)
                 numSolutions = 1;
 
-            System.out.print("Should the answers be printed? [y/n] ");
-            boolean displayAns = getBool(input, defaultDisplayAllAns);
+            System.out.print("Enter 0 to print all answers, 1 to only print repeats, or 2 to not print solutions: ");
+            int displayAns = getNumber(input, defaultDisplayAllAns);
+            if (displayAns < 0 || displayAns > 2)
+                displayAns = defaultDisplayAllAns;
+            PrintMode printMode = switch (displayAns) {
+                case 2 -> PrintMode.NONE;
+                case 1 -> PrintMode.REPEATS;
+                default -> PrintMode.ALL;
+            };
             
             System.out.println("Specify solver type: 0 for lines, 1 for loops, 2 for lines with specified endpoints, 3 for startpoint solver");
             solverType = getNumber(input, defaultSoleverType);
@@ -58,79 +64,68 @@ public class App {
             System.out.print("Ensure all answers are different? [y/n] ");
             boolean ensureDifferentAns = getBool(input, defaultEnsureDifferentAns);
 
-            boolean displayRepeatsOnly = false;
-            if(ensureDifferentAns && !displayAns)
-            {
-                System.out.print("Display only repeats? [y/n] ");
-                displayRepeatsOnly = getBool(input, defaultDisplayRepeatsOnly);
-            }
-
-            System.out.print("Would you like a solver with extra randomness? [y/n] ");
-            boolean randomerBC = getBool(input, true);
-
-            if(randomerBC)
-            {
-                bc = new BoardCreator.RandLessAccurateCreator();
-            }
-            else
-            {
-                bc = new BoardCreator.AccurateBoardCreator();
-            }
+            System.out.print("0 for original solver, 1 for a bit extra randomness, 2 for highest randomness(may not find an answer): ");
+            int bcType = getNumber(input, 1);
+            bc = switch (bcType) {
+                case 2 -> new BCFromBoard();
+                case 1 -> new BC4x2();
+                default -> new BC4x4();
+            };
 
             boolean displayProgress = false;
-            if(numSolutions >= 50000 && !displayAns)
+            if (numSolutions >= 50000 && printMode != PrintMode.ALL)
             {
                 System.out.print("Show % progress and statistics? [y/n] ");
                 displayProgress = getBool(input, defaultDisplayProgress);
             }
 
-            if(solverType==ENDPOINT_LINES && !RUN_DEFAULT)
+            if (solverType == ENDPOINT_LINES && !RUN_DEFAULT)
             {
-                int rC1,cC1,rC2,cC2;
+                int rC1, cC1, rC2, cC2;
                 System.out.println("Enter the end points' start row, start column, end row, and end column.");
                 System.out.println("(0,0) is the top left corner. Separate with spaces, e.g. '1 2 0 6'");
                 rC1 = getNumber(input, defaultRC);
-                if(rC1<0||rC1>=r)
+                if (rC1 < 0 || rC1 >= r)
                     rC1 = defaultRC;
 
                 cC1 = getNumber(input, defaultRC);
-                if(cC1<0||cC1>=c)
+                if (cC1 < 0 || cC1 >= c)
                     cC1 = defaultRC;
 
                 rC2 = getNumber(input, defaultRC);
-                if(rC2<0||rC2>=r)
+                if (rC2 < 0 || rC2 >= r)
                     rC2 = defaultRC;
 
                 cC2 = getNumber(input, defaultRC);
-                if(cC2<0||cC2>=c)
+                if (cC2 < 0 || cC2 >= c)
                     cC2 = defaultRC;
                 startC = new Coordinate(rC1, cC1);
                 endC = new Coordinate(rC2, cC2);
                 
-                if(EndPointSolver.sameColor(startC, endC))
+                if (EndPointSolver.sameColor(startC, endC))
                 {
-                    if(cC2==0)
+                    if (cC2 == 0)
                         cC2++;
                     else 
                         cC2--;
                     endC = new Coordinate(rC2, cC2);
                     System.out.println("Those points were of the same color");
-                    System.out.println("instead doing: "+startC+" -> "+endC);
-                } 
+                    System.out.println("instead doing: " + startC + " -> " + endC);
+                }
             }
-            if(solverType == STARTPOINT_LINES)
+            if (solverType == STARTPOINT_LINES)
             {
-                int rC1,cC1;
+                int rC1, cC1;
                 System.out.println("Enter the end points' start row, start column.");
                 System.out.println("(0,0) is the top left corner. Separate with spaces, e.g. '1 2'");
                 rC1 = getNumber(input, defaultRC);
-                if(rC1<0||rC1>=r)
+                if (rC1 < 0 || rC1 >= r)
                     rC1 = defaultRC;
 
                 cC1 = getNumber(input, defaultRC);
-                if(cC1<0||cC1>=c)
+                if (cC1 < 0 || cC1 >= c)
                     cC1 = defaultRC;
-                if(!RUN_DEFAULT)
+                if (!RUN_DEFAULT)
                     startC = new Coordinate(rC1, cC1);
             }
             Statistic stat;
@@ -141,29 +136,20 @@ public class App {
                     case STARTPOINT_LINES -> new StartpointSolver(r, c, startC, bc);
                     default -> new LoopSolver(r,c, bc);
             };
-            if(ensureDifferentAns)
-            {
-                if(displayRepeatsOnly)
-                    stat=solver.makeAndPrintRepeatedSolutions(numSolutions, displayAns, displayProgress);
-                else
-                    stat=solver.makeAndPrintDifferentSolution(numSolutions, displayAns, displayProgress);
-            }
-            else
-            {
-                stat = solver.makeAndPrintSolution(numSolutions, displayAns,displayProgress);
-            }
+            stat = solver.manySolutions(numSolutions, printMode, displayProgress, ensureDifferentAns);
+
             System.out.println(stat);
             System.out.println("Would you like to run again? [y/n]");            
             running = getBool(input, false);
         
-        } while(running); 
+        } while (running);
     }
 
     // returns a number from the scanner
     // if a number was not found, returns the default
     static int getNumber(Scanner scan, int def)
     {
-        if(RUN_DEFAULT)
+        if (RUN_DEFAULT)
             return def;
         try {
             return scan.nextInt();
@@ -177,12 +163,12 @@ public class App {
     // if the character was not y/n, returns default
     public static boolean getBool(Scanner scan, boolean def)
     {
-        if(RUN_DEFAULT)
+        if (RUN_DEFAULT)
             return def;
         char ch = scan.next().charAt(0);
-        if(ch == 'y' || ch == 'Y')
+        if (ch == 'y' || ch == 'Y')
             return true;
-        if(ch == 'n' || ch == 'N')
+        if (ch == 'n' || ch == 'N')
             return false;
         return def;
     }

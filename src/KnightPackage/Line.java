@@ -281,13 +281,12 @@ public class Line implements Iterable<CoordinatePair>{
         linkCoords();
     }
 
-
     //merges the line with another loop
-    //returns if a merge was succesful
+    //returns true if a merge happened
     public boolean mergeLoopsAnywhereAdjacentPaths()
     {
-        //check all adjacent pairs of the current loop, and for them, look at all 
-        // easy to make it check if it can loop with anyone rather than a specific other loop
+        //check all adjacent pairs of the current loop, and for them, look in all 8 dirictions
+        // merge if any of these 8 moved pairs are consecutive in another loop 
         CoordinatePair moved;
         setTraversalType(LineIterator.Traversal.random);
         for(CoordinatePair cp: this)

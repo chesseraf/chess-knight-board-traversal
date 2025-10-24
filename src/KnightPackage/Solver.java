@@ -1,13 +1,18 @@
 package KnightPackage;
-
+import KnightPackage.Statistic.StatType;
 import java.util.HashMap;
-import java.util.HashSet;
 
 public abstract class Solver {
     protected Board board;
     protected Statistic stat;     
     protected BoardCreator bc;
-    private int maxConsecutiveFailsUntilStop = 100;
+    private int maxConsecutiveFailsUntilStop = 800;
+    private static final int MAX_CONSECUTIVE_REPEATS_UNTIL_STOP = 30;
+    public enum PrintMode{
+        NONE,
+        REPEATS,
+        ALL
+    }
     
     public Solver(int rows, int cols, BoardCreator bC)
     {
@@ -44,26 +49,28 @@ public abstract class Solver {
      */
     public Line makeSolution()
     {
-        int orignalFails = stat.getFails();
-        while(!solve() && stat.getFails() - orignalFails < maxConsecutiveFailsUntilStop)
+        int originalFails = stat.get(StatType.FAILS);
+        while(!solve() && stat.get(StatType.FAILS) - originalFails < maxConsecutiveFailsUntilStop)
         {
-            stat.fail();
+            stat.inc(StatType.FAILS);
             restartSolver();     
         }
-        if(stat.getFails() - orignalFails >= maxConsecutiveFailsUntilStop)
+        if(stat.get(StatType.FAILS) - originalFails >= maxConsecutiveFailsUntilStop)
         {
             return answer(); // non-null object, stat.solut
         }
-        stat.solution();
-        if(!answer().valid())
-            System.err.println("wrong");
+        stat.inc(StatType.SOLUTIONS);
+        if(!answer().valid()) {
+            System.err.println("Detected solution is invalid. " + solverDebugMsg());
+        }
 
         return answer();
     }
 
-    public String answerStr()
+    public String solverDebugMsg()
     {
-        return board.answer().toString();
+        return " Solver type: "+this.getClass().getName()+" Board creator type: "+bc.getClass().getName()+
+               " Board size: "+board.getRows()+"x"+board.getCols();
     }
 
     @Override
@@ -71,97 +78,73 @@ public abstract class Solver {
     {
         return (board.toString());
     }
-    public Statistic makeAndPrintRepeatedSolutions(int num, boolean print, boolean displayProgress)
+    /**
+     * 
+     * @param numAns number of answers to find
+     * @param pMode printing mode
+     * @param displayProgress whether to display progress periodically
+     * @param ensureDifferentAns whether to ensure all answers found are different
+     * @return statistics about the solving process
+     */
+    public Statistic manySolutions(int numAns, PrintMode pMode, boolean displayProgress, boolean ensureDifferentAns)
     {
-        HashMap<Line, Integer> hash = new HashMap<>((int)(num/0.75)+1);
-        stat = new Statistic(num);
-        stat.trackRepeats();
-        stat.trackSolutions();
-        stat.trackFails();
-        int repeatThreshold = 2;
-        int prevSolutions;
-        
-        for(int i=0; i<num; i++)
-        {
-            prevSolutions = stat.getSolutions();
-            int consecutiveRepeats = 0;
-            while(hash.containsKey(makeSolution()))
-            {
-                Integer numRep = hash.get(answer());
-                numRep++;
-                hash.put(answer(), numRep);
-                stat.repeat();
-                if(numRep >= repeatThreshold)
-                {
-                    if(print)
-                    {
-                        System.out.println(answer());
-                    }
-                    System.err.println("repeat amount: "+numRep);
-                }
-                restartSolver();
-                if(consecutiveRepeats>30)
-                {
-                    System.out.println("These are all the solutions found\n");
-                    return stat;
-                }
-            }
-            if(stat.getSolutions()==prevSolutions)
-            {
-                if(stat.getSolutions() == 0)
-                    System.out.print("No such solutions were found\n");
-                else
-                    System.out.println("These are all the solutions found\n");
-                return stat;
-            }
-            hash.put(answer(),1);
-            if(displayProgress)
-            {
-                displayProgress();
-            }
-            restartSolver();
+        // If the past answers are not needed, dont store them for efficiency
+        final boolean storeAns = (pMode == PrintMode.REPEATS || ensureDifferentAns);
+        HashMap<Line, Integer> foundAnswers =new HashMap<>(storeAns ? (int)(numAns/0.75)+1 : 0);
+        if (pMode == null) {
+            pMode = PrintMode.NONE;
         }
-        return stat;
-    }
-    
-    public Statistic makeAndPrintDifferentSolution(int num, boolean print, boolean displayProgress)
-    {
-        HashSet<Line> hash = new HashSet<>((int)(num/0.75)+1);
-        stat = new Statistic(num); 
-        stat.trackRepeats();
-        stat.trackSolutions();
-        stat.trackFails();
-        int prevSolutions;
+        stat = new Statistic(numAns); 
+        if (storeAns) {
+            stat.track(StatType.REPEATS);
+        }
+        stat.track(StatType.SOLUTIONS);
+        stat.track(StatType.FAILS);
         
-        for(int i=0; i<num; i++)
-        {            
-            prevSolutions = stat.getSolutions();
+        for(int i=0; i<numAns; i++)
+        {
+            int prevSolutions = stat.get(StatType.SOLUTIONS);
             int consecutiveRepeats = 0;
-            while(hash.contains(makeSolution()))
-            {
-                stat.repeat();
-                restartSolver();
-                consecutiveRepeats++;
-                if(consecutiveRepeats>30)
+            makeSolution();
+            if (ensureDifferentAns) {
+                while (foundAnswers.containsKey(answer()))
                 {
-                    System.out.println("These are all the solutions found\n");
-                    return stat;
+                    stat.inc(StatType.REPEATS);
+                    if (pMode == PrintMode.REPEATS)
+                    {
+                        System.out.println("Num: " + foundAnswers.get(answer()) + " answer:\n" + answer());
+                    }
+                    restartSolver();
+                    consecutiveRepeats++;
+                    if(consecutiveRepeats>MAX_CONSECUTIVE_REPEATS_UNTIL_STOP)
+                    {
+                        System.out.println("These are all the solutions found\n");
+                        return stat;
+                    }
+                    makeSolution();
                 }
             }
-            if(stat.getSolutions()==prevSolutions)
+            if(stat.get(StatType.SOLUTIONS)==prevSolutions)  // Failed to find a solution
             {
-                if(stat.getSolutions() == 0)
+                if(stat.get(StatType.SOLUTIONS) == 0)
                     System.out.print("No such solutions were found\n");
                 else
                     System.out.println("These are all the solutions found\n");
                 return stat;
             }
-            hash.add(answer());
-            
-            if(print)
+            boolean toPrint = (pMode == PrintMode.ALL);
+            if (storeAns) {
+                if (foundAnswers.containsKey(answer())) {
+                    foundAnswers.put(answer(), foundAnswers.get(answer()) + 1);
+                    toPrint |= (pMode == PrintMode.REPEATS);
+                } else {
+                    foundAnswers.put(answer(), 1);
+                }
+            }
+            if (toPrint) {
                 System.out.println(answer()+"\n"+answer().start()+"->"+answer().end());
-            else if(displayProgress)
-            {
+            }
+            if(displayProgress) {
                 displayProgress();
             }
             restartSolver();
@@ -170,37 +153,9 @@ public abstract class Solver {
     }
     public void displayProgress()
     {
-        if(stat.getSolutions()%20000 == 0 && stat.getSolutions()>0)
+        if(stat.get(StatType.SOLUTIONS)%20000 == 0 && stat.get(StatType.SOLUTIONS) > 0)
         {
             System.out.println(stat);
         }
-    }
-    public Statistic makeAndPrintSolution(int num, boolean print, boolean displayProgress)
-    {
-        stat = new Statistic(num);
-        stat.trackSolutions();
-        stat.trackFails();
-        int prevSolutions;
-        for(int i=0; i<num; i++)
-        {
-            prevSolutions = stat.getSolutions();
-            restartSolver();
-            makeSolution();
-            if(stat.getSolutions()==prevSolutions)
-            {
-                if(stat.getSolutions() == 0)
-                    System.out.print("No such solutions were found\n");
-                else
-                    System.out.println("These are all the solutions found\n");
-                return stat;
-            }
-            if(print)
-                System.out.println(answer());
-            else if(displayProgress)
-            {
-                displayProgress();
-            }
-        }
-        return stat;
-    }    
+    } 
 }

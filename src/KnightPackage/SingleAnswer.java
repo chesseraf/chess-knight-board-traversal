@@ -4,7 +4,7 @@ public class SingleAnswer
    // 8x8 solution
    public static Line solve8x8line()
    {
-        LineSolver ls = new LineSolver(8, 8, new BoardCreator.RandLessAccurateCreator());
+        LineSolver ls = new LineSolver(8, 8, new BC4x2());
         return ls.makeSolution();
    }
     
@@ -15,7 +15,7 @@ public class SingleAnswer
         System.err.println("Invalid coordinates");
         return null;
     }
-    EndPointSolver ls = new EndPointSolver(8, 8, s, f, new BoardCreator.RandLessAccurateCreator());
+    EndPointSolver ls = new EndPointSolver(8, 8, s, f, new BC4x2());
     return ls.makeSolution();
    }
 
@@ -26,7 +26,7 @@ public class SingleAnswer
 
     public static Line solve8x8loop()
     {
-        LoopSolver ls = new LoopSolver(8, 8, new BoardCreator.RandLessAccurateCreator());
+        LoopSolver ls = new LoopSolver(8, 8, new BC4x2());
         return ls.makeSolution();
     }
 }
