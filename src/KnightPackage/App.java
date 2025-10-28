@@ -6,20 +6,23 @@ import java.util.Scanner;
 
 public class App {
     public static final boolean RUN_DEFAULT = false;
-    public static int numComparisons = 0;
+    public static int numComparisons = 0;  // for performance tracking
     public static final int RAND_LINES = 0, RAND_LOOPS = 1, ENDPOINT_LINES = 2, STARTPOINT_LINES = 3;
     public static void main(String[] args){
         
-        int defaultSoleverType = STARTPOINT_LINES;
+        int defaultSolverType = RAND_LINES;
         int defaultr = 8, defaultc = 8;
         int defaultNumSolutions = 10;
         int defaultDisplayAllAns = 0;
         boolean defaultEnsureDifferentAns = true;
         boolean defaultDisplayProgress = true;
-        Coordinate startC = new Coordinate(2, 5), endC = new Coordinate(2, 1); //for enpoint lines
+        Coordinate startC = new Coordinate(1,2), endC = new Coordinate(3,3); //for enpoint lines
         BoardCreator bc;
 
         int defaultRC = 0;
+        // Default row and col for start and end coordinates for user specified endpoints
+        // Provides an answer when all parameters are default
+        int drC1 = 0, dcC1 = 0, drC2 = 3, dcC2 = 0;
         int solverType;
         boolean running;
         Scanner input = new Scanner(System.in);
@@ -31,12 +34,13 @@ public class App {
         System.out.println("");
         do 
         {
-            System.out.print("Enter the board row count (mulitple of 4, default 8): ");
+            // Start by getting user input
+            System.out.print("Enter the board row count (multiple of 4, default 8): ");
             int r = getNumber(input, defaultr) / 4 * 4;
             if(r<4) 
                 r=4;
 
-            System.out.print("Enter the board col count (mulitple of 4, default 8): ");
+            System.out.print("Enter the board col count (multiple of 4, default 8): ");
             int c = getNumber(input, defaultc) / 4 * 4;
             if (c < 4) 
                 c = 4;
@@ -59,7 +63,9 @@ public class App {
             };
             
             System.out.println("Specify solver type: 0 for lines, 1 for loops, 2 for lines with specified endpoints, 3 for startpoint solver");
-            solverType = getNumber(input, defaultSoleverType);
+            solverType = getNumber(input, defaultSolverType);
+            if (solverType < 0 || solverType > 3)
+                solverType = defaultSolverType;
             
             System.out.print("Ensure all answers are different? [y/n] ");
             boolean ensureDifferentAns = getBool(input, defaultEnsureDifferentAns);
@@ -83,20 +89,20 @@ public class App {
             {
                 int rC1, cC1, rC2, cC2;
                 System.out.println("Enter the end points' start row, start column, end row, and end column.");
-                System.out.println("(0,0) is the top left corner. Separate with spaces, e.g. '1 2 0 6'");
-                rC1 = getNumber(input, defaultRC);
+                System.out.println("(0,0) is the top left corner. Separate with spaces, e.g. '3 2 0 6'");
+                rC1 = getNumber(input, drC1);
                 if (rC1 < 0 || rC1 >= r)
                     rC1 = defaultRC;
 
-                cC1 = getNumber(input, defaultRC);
+                cC1 = getNumber(input, dcC1);
                 if (cC1 < 0 || cC1 >= c)
                     cC1 = defaultRC;
 
-                rC2 = getNumber(input, defaultRC);
+                rC2 = getNumber(input, drC2);
                 if (rC2 < 0 || rC2 >= r)
                     rC2 = defaultRC;
 
-                cC2 = getNumber(input, defaultRC);
+                cC2 = getNumber(input, dcC2);
                 if (cC2 < 0 || cC2 >= c)
                     cC2 = defaultRC;
                 startC = new Coordinate(rC1, cC1);

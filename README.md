@@ -4,7 +4,7 @@ March 2025
 Last updated - October 2025
 
 ## Overview
-The knight's tour is a fun chess problem. The goal is to take a chess knight, and move it on an 8x8 chess board repeatedly such that the knight visits all squares exactly once. This program can create solutions on boards of any dimensions as long as the width and height are each divisible by 4.
+The knight's tour is a fun chess problem. The goal is to take a chess knight, and move it on an 8x8 chess board repeatedly such that the knight visits all squares exactly once. This program can create solutions on boards of any dimensions as long as the width and height are each divisible by 4. The most interesting part is that the starting point and the ending point can be specified by the user.
 
 In the example solution below, the knight starts in the top left corner, labeled with a 1. Then it moves to the spot labeled 2, and so on until 64. 
 <pre>
@@ -18,7 +18,7 @@ In the example solution below, the knight starts in the top left corner, labeled
 | 20 | 23 | 62 | 37 | 34 | 25 | 44 | 49 |  
 </pre>
 
-A knights move follows an L shape. It move 2 spaces in any of the 4 directions, and 1 space in a perpendicular direction. 
+A knights move follows an L shape. It move 2 spaces in any of the 4 directions, and 1 space in a perpendicular direction. For example, a knight can move from the spot labeled 1 to the spot labeled 2 in the example above.
 
 ## Running the program
 To run the program:
@@ -36,10 +36,10 @@ java -cp bin KnightPackage.App
 ```
 
 ## Description
-There are 4 different solvers for the chess knight's tour problem that the user can choose between. They all contain randomness so they will result in a large number of different solutions.
+There are 4 different solvers for the chess knight's tour problem that the user can choose between. They all contain randomness so they will find a large number of different solutions. Different solvers create solutions with different properties.
 
 1) Lines:
-No restrictions. The start and end point can be anywhere on the board.
+No restrictions. The start and end point of the solution can be anywhere on the board.
 2) Loops:
 The result will be a loop, meaning the end point is adjacent (by a knight move) to the starting point.
 3) Specified endpoints:
@@ -65,14 +65,19 @@ All of the Java code is in `src/KnightPackage`
 The compiled output files will be generated in the `bin` folder by default.
 
 ## Using the jar file
-The .jar file for this project called KnightSolverV4.jar is available in the project. It is at the same level as the bin and src folders. 
+To generate another .jar file, run the following command from the `bin` folder.
+Replace the X in VX with a version number.
+```bash
+jar -cf ../knightSolverVX.jar .
+```
+The latest .jar file for this project is KnightSolverV5.jar and is available in the project. It is in the root directory of the project. 
+
 The package name is KnightPackage. After adding the jar file, for example, use:
 ```Java
 import KnightPackage.*;
 ```
 
 ## Core algorithm
-### General idea
 1) Start by creating several loops on the board, such that each square is a part of exactly one loop.
 A loop is a sequence of cells where each one is adjacent to the next one via a knight move, and the first one is adjacent to the last one.
 One method to do this is to split the board into 4x4 sections. Each such section can be split into loops as follows:
@@ -126,7 +131,7 @@ Example how 2 loops are merged into one. There is one loop in the upper 4x4 sect
 |    | 4  |    |    |  
 |    |    |    | 3  |  
 
--> Merged
+ Merged
 | 1  |    |    |    |  
 |    |    | 2  |    |  
 |    | 8  |    |    |  

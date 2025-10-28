@@ -368,8 +368,8 @@ public class Line implements Iterable<CoordinatePair>{
         int maxDigits = Integer.toString(maxC*maxR).length();
         int maxLen = (int)Math.pow(10, maxDigits);
         int n;
-        String fin = "";
-        for(int i=0; i<(maxDigits+3)*maxC; i++)
+        String fin = " ";
+        for(int i=0; i<(maxDigits+3)*maxC-1; i++)
             fin +=("_");
         fin+=("\n");
         for(int r=0; r<maxR; r++)
